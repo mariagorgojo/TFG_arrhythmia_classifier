@@ -1,0 +1,32 @@
+{
+  "output_file": "ecg_training_dataset_arrhythmia4_features_deidentified.npz",
+  "dataset_scope": "arrhythmia4_deidentified_candidate",
+  "examples": 21593,
+  "signal_shape": [
+    21593,
+    2048
+  ],
+  "rhythm_features_shape": [
+    21593,
+    18
+  ],
+  "device_group_count": 165,
+  "labels": [
+    "AF",
+    "Asystole",
+    "Brady",
+    "VT"
+  ],
+  "label_counts": {
+    "VT": 4880,
+    "Brady": 1945,
+    "Asystole": 9725,
+    "AF": 5043
+  },
+  "removed_fields": [
+    "occurrence_ids",
+    "label_names",
+    "source_label_names"
+  ],
+  "privacy_note": "Original occurrence identifiers were removed and device identifiers were replaced with generic groups. ECG waveforms remain clinical data. Obtain data-governance approval before uploading or sharing this file."
+}

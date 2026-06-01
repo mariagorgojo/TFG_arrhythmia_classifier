@@ -1,0 +1,45 @@
+# Private source data and derived occurrence-level data
+data/
+docs/
+*.xml
+*.pdd
+*.xlsx
+currentecg_predictions.csv
+occurrences_manifest.csv
+raw_xml_manifest.csv
+
+# Dataset and model candidates require explicit review before staging
+datasets/*.npz
+model/*.pt
+
+# Local environments and generated files
+.pythonlibs/
+.venv/
+.venv312/
+__pycache__/
+*.pyc
+.pytest_cache/
+.tmp/
+.matplotlib/
+.idea/
+.DS_Store
+
+# Historical delivery bundles
+*.zip
+prototipo_tfg/
+tutor_handoff/
+tutor_handoff_email/
+tutor_handoff_datasets_only/
+
+# Local historical prototypes and unrelated utilities
+prototype_app.py
+static/
+templates/
+reports/
+medtronic_package_splitter_project/
+tempCodeRunnerFile.python
+arrhythmia_classifier/neural_classifier.py
+archive/
+
+# Real ECG example plots and source index
+ecg_examples/
