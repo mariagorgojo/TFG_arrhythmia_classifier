@@ -1,0 +1,18 @@
+CurrentECG exploratory inference report
+
+Important: CurrentECG is not a confirmed diagnostic label.
+These predictions are exploratory and cannot be evaluated with accuracy or F1-score without clinical reference labels.
+The model has no NSR/normal or other/indeterminate output, so every CurrentECG is forced into one of four arrhythmia classes.
+A predicted AF result may therefore be a wrong nearest-class assignment, particularly for NSR-like records with slight irregularity, noise, artifact or oversensing.
+
+Processed CurrentECG records: 82,668
+Skipped while loading: 0
+
+Predicted distribution:
+- AF: 80,731 (97.66%)
+- Asystole: 1,915 (2.32%)
+- Brady: 20 (0.02%)
+- VT: 2 (0.00%)
+
+Mean confidence: 0.9576
+Median confidence: 0.9902

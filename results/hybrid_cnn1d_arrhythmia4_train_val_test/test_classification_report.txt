@@ -1,0 +1,10 @@
+              precision    recall  f1-score   support
+
+          AF       0.92      0.89      0.90      1005
+    Asystole       0.81      0.49      0.61      1945
+       Brady       0.25      0.99      0.40       361
+          VT       0.99      0.71      0.83       976
+
+    accuracy                           0.68      4287
+   macro avg       0.74      0.77      0.68      4287
+weighted avg       0.83      0.68      0.71      4287

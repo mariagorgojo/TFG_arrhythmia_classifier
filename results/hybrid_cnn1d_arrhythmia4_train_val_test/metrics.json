@@ -1,0 +1,266 @@
+{
+  "model_type": "ECGHybridCNN",
+  "evaluation_protocol": "device_disjoint_train_validation_test",
+  "methodological_note": "Training updates use only train groups. The best checkpoint is selected using validation groups. Test groups are evaluated once after training.",
+  "dataset_path": "data\\processed\\training_dataset\\ecg_training_dataset_arrhythmia4_features.npz",
+  "model_path": "data\\processed\\models\\hybrid_cnn1d_arrhythmia4_train_val_test\\hybrid_cnn1d_train_val_test_model.pt",
+  "validation_size_requested": 0.2,
+  "test_size_requested": 0.2,
+  "split_strategy": "stratified_group",
+  "random_state": 42,
+  "epochs_requested": 20,
+  "epochs_completed": 11,
+  "monitor_metric": "macro_f1",
+  "best_validation_monitor_value": 0.866924524193414,
+  "batch_size": 128,
+  "learning_rate": 0.001,
+  "target_samples": 2048,
+  "rhythm_feature_names": [
+    "waveform_duration_seconds",
+    "marker_count",
+    "rr_count",
+    "rr_mean_seconds",
+    "rr_median_seconds",
+    "rr_std_seconds",
+    "rr_cv",
+    "rr_min_seconds",
+    "rr_max_seconds",
+    "heart_rate_mean_bpm",
+    "heart_rate_median_bpm",
+    "marker_vs_fraction",
+    "marker_bs_fraction",
+    "marker_vts_fraction",
+    "marker_vfs_fraction",
+    "marker_reject_fraction",
+    "raw_signal_std_mv",
+    "raw_signal_peak_to_peak_mv"
+  ],
+  "train_examples": 12953,
+  "validation_examples": 4353,
+  "test_examples": 4287,
+  "train_device_count": 96,
+  "validation_device_count": 35,
+  "test_device_count": 34,
+  "train_label_counts": {
+    "VT": 2928,
+    "Brady": 1159,
+    "Asystole": 5843,
+    "AF": 3023
+  },
+  "validation_label_counts": {
+    "Asystole": 1937,
+    "VT": 976,
+    "Brady": 425,
+    "AF": 1015
+  },
+  "test_label_counts": {
+    "AF": 1005,
+    "VT": 976,
+    "Asystole": 1945,
+    "Brady": 361
+  },
+  "class_weights_from_train_only": {
+    "AF": 1.0712040662765503,
+    "Asystole": 0.5542101860046387,
+    "Brady": 2.794003486633301,
+    "VT": 1.1059596538543701
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.5429492907331578,
+      "train_accuracy": 0.7900100362850305,
+      "validation_loss": 0.49088833621253153,
+      "validation_accuracy": 0.8327590167700436,
+      "validation_macro_f1": 0.6948865202353969,
+      "validation_weighted_f1": 0.8105563556879115
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.19089014278888003,
+      "train_accuracy": 0.9258858951594225,
+      "validation_loss": 0.3273289542403025,
+      "validation_accuracy": 0.8688260969446359,
+      "validation_macro_f1": 0.7331455277131427,
+      "validation_weighted_f1": 0.8419674743853334
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.1408200941267786,
+      "train_accuracy": 0.9449548367173628,
+      "validation_loss": 0.3524312123522768,
+      "validation_accuracy": 0.8605559384332644,
+      "validation_macro_f1": 0.7670758821068653,
+      "validation_weighted_f1": 0.8518516741010794
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.11634056247574642,
+      "train_accuracy": 0.9529066625492164,
+      "validation_loss": 0.33707229425763086,
+      "validation_accuracy": 0.8743395359522168,
+      "validation_macro_f1": 0.7407753524632965,
+      "validation_weighted_f1": 0.846864546409154
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.10655805896969088,
+      "train_accuracy": 0.9557631436732803,
+      "validation_loss": 0.3730843250926215,
+      "validation_accuracy": 0.8543533195497358,
+      "validation_macro_f1": 0.7310928770602043,
+      "validation_weighted_f1": 0.8365856600768483
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.10244673744734444,
+      "train_accuracy": 0.957384389716668,
+      "validation_loss": 0.2804370931091458,
+      "validation_accuracy": 0.8966230186078566,
+      "validation_macro_f1": 0.866924524193414,
+      "validation_weighted_f1": 0.9004757887269601
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.08838253626372704,
+      "train_accuracy": 0.9614761059214082,
+      "validation_loss": 0.28801520554575183,
+      "validation_accuracy": 0.8807718814610613,
+      "validation_macro_f1": 0.8089932837404494,
+      "validation_weighted_f1": 0.8737308774266772
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.09073738927103733,
+      "train_accuracy": 0.9622481278468309,
+      "validation_loss": 0.47851556858577154,
+      "validation_accuracy": 0.870434183321847,
+      "validation_macro_f1": 0.7121700404619896,
+      "validation_weighted_f1": 0.8353467764968852
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.0790667161420258,
+      "train_accuracy": 0.9662626418590288,
+      "validation_loss": 0.3426050011410046,
+      "validation_accuracy": 0.8614748449345279,
+      "validation_macro_f1": 0.7524835327068287,
+      "validation_weighted_f1": 0.8460171014829672
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.08024908932144326,
+      "train_accuracy": 0.965722226511233,
+      "validation_loss": 0.8479228818174234,
+      "validation_accuracy": 0.8637721111876866,
+      "validation_macro_f1": 0.6904543424162238,
+      "validation_weighted_f1": 0.8233655339227104
+    },
+    {
+      "epoch": 11,
+      "train_loss": 0.07264251984114593,
+      "train_accuracy": 0.9691191229830928,
+      "validation_loss": 0.35460616042634246,
+      "validation_accuracy": 0.8805421548357455,
+      "validation_macro_f1": 0.778534221637495,
+      "validation_weighted_f1": 0.8631080930066355
+    }
+  ],
+  "validation": {
+    "accuracy": 0.8966230186078566,
+    "loss": 0.2804370931091458,
+    "classification_report": {
+      "AF": {
+        "precision": 0.9123314065510597,
+        "recall": 0.9330049261083744,
+        "f1-score": 0.922552362396493,
+        "support": 1015.0
+      },
+      "Asystole": {
+        "precision": 0.9640852974186308,
+        "recall": 0.8869385647909138,
+        "f1-score": 0.9239042753428341,
+        "support": 1937.0
+      },
+      "Brady": {
+        "precision": 0.6113989637305699,
+        "recall": 0.8329411764705882,
+        "f1-score": 0.7051792828685259,
+        "support": 425.0
+      },
+      "VT": {
+        "precision": 0.9266247379454927,
+        "recall": 0.9057377049180327,
+        "f1-score": 0.9160621761658031,
+        "support": 976.0
+      },
+      "accuracy": 0.8966230186078566,
+      "macro avg": {
+        "precision": 0.8536101014114382,
+        "recall": 0.8896555930719773,
+        "f1-score": 0.866924524193414,
+        "support": 4353.0
+      },
+      "weighted avg": {
+        "precision": 0.9091844480977501,
+        "recall": 0.8966230186078566,
+        "f1-score": 0.9004757887269601,
+        "support": 4353.0
+      }
+    },
+    "outputs": {
+      "classification_report": "data\\processed\\models\\hybrid_cnn1d_arrhythmia4_train_val_test\\validation_classification_report.txt",
+      "confusion_matrix_csv": "data\\processed\\models\\hybrid_cnn1d_arrhythmia4_train_val_test\\validation_confusion_matrix.csv",
+      "confusion_matrix_png": "data\\processed\\models\\hybrid_cnn1d_arrhythmia4_train_val_test\\validation_confusion_matrix.png"
+    }
+  },
+  "test": {
+    "accuracy": 0.6759972008397481,
+    "loss": 0.8532360130518563,
+    "classification_report": {
+      "AF": {
+        "precision": 0.9158110882956879,
+        "recall": 0.8875621890547264,
+        "f1-score": 0.9014653865588681,
+        "support": 1005.0
+      },
+      "Asystole": {
+        "precision": 0.8145299145299145,
+        "recall": 0.489974293059126,
+        "f1-score": 0.6118780096308186,
+        "support": 1945.0
+      },
+      "Brady": {
+        "precision": 0.24895977808599168,
+        "recall": 0.9944598337950139,
+        "f1-score": 0.3982251802551303,
+        "support": 361.0
+      },
+      "VT": {
+        "precision": 0.9900142653352354,
+        "recall": 0.7110655737704918,
+        "f1-score": 0.8276684555754323,
+        "support": 976.0
+      },
+      "accuracy": 0.6759972008397481,
+      "macro avg": {
+        "precision": 0.7423287615617075,
+        "recall": 0.7707654724198396,
+        "f1-score": 0.6848092580050624,
+        "support": 4287.0
+      },
+      "weighted avg": {
+        "precision": 0.8305993072904322,
+        "recall": 0.6759972008397481,
+        "f1-score": 0.7109025297264588,
+        "support": 4287.0
+      }
+    },
+    "outputs": {
+      "classification_report": "data\\processed\\models\\hybrid_cnn1d_arrhythmia4_train_val_test\\test_classification_report.txt",
+      "confusion_matrix_csv": "data\\processed\\models\\hybrid_cnn1d_arrhythmia4_train_val_test\\test_confusion_matrix.csv",
+      "confusion_matrix_png": "data\\processed\\models\\hybrid_cnn1d_arrhythmia4_train_val_test\\test_confusion_matrix.png"
+    }
+  },
+  "device": "cpu"
+}

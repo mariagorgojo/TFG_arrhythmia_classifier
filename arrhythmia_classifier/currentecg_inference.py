@@ -35,7 +35,7 @@ from arrhythmia_classifier.hybrid_cnn1d_classifier import ECGHybridCNN
 DEFAULT_MANIFEST_PATH = (
     PROJECT_ROOT / "data" / "processed" / "occurrence_dataset" / "occurrences_manifest.csv"
 )
-DEFAULT_MODEL_PATH = PROJECT_ROOT / "model" / "hybrid_cnn1d_model.pt"
+DEFAULT_MODEL_PATH = PROJECT_ROOT / "model" / "hybrid_cnn1d_train_val_test_model.pt"
 DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "results" / "currentecg_exploratory"
 
 

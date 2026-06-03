@@ -1,0 +1,55 @@
+{
+  "analysis_type": "unlabeled_currentecg_exploratory_inference",
+  "model_path": "data\\processed\\models\\hybrid_cnn1d_arrhythmia4_train_val_test\\hybrid_cnn1d_train_val_test_model.pt",
+  "manifest_path": "data\\processed\\occurrence_dataset\\occurrences_manifest.csv",
+  "labels": [
+    "AF",
+    "Asystole",
+    "Brady",
+    "VT"
+  ],
+  "target_samples": 2048,
+  "required_sampling_rate_hz": 128.0,
+  "min_samples": 256,
+  "selected_currentecg_records": 82668,
+  "processed_currentecg_records": 82668,
+  "skipped_while_loading": 0,
+  "excluded_before_loading": {
+    "without_stored_waveform": 4,
+    "too_short": 65
+  },
+  "predicted_counts": {
+    "AF": 80731,
+    "Asystole": 1915,
+    "Brady": 20,
+    "VT": 2
+  },
+  "predicted_percentages": {
+    "AF": 97.65689263076402,
+    "Asystole": 2.316494895243625,
+    "Brady": 0.024193158174868147,
+    "VT": 0.002419315817486815
+  },
+  "confidence_counts": {
+    ">=0.90": 73311,
+    "0.70-0.89": 6186,
+    "0.50-0.69": 3086,
+    "<0.50": 85
+  },
+  "mean_confidence": 0.9576184153556824,
+  "median_confidence": 0.9901888966560364,
+  "limitations": [
+    "CurrentECG is a device/export label, not a confirmed clinical diagnosis.",
+    "Accuracy, sensitivity, F1-score and a confusion matrix cannot be calculated for this cohort without reference labels.",
+    "The model has no NSR/normal or other/indeterminate class and is forced to choose one of four arrhythmias for every record.",
+    "AF predictions may include NSR or unsupported rhythms that appear closest to AF because of slight irregularity, noise, artifact or oversensing.",
+    "These predictions are exploratory and require expert clinical review before clinical interpretation."
+  ],
+  "outputs": {
+    "predictions_csv": "data\\processed\\models\\hybrid_cnn1d_arrhythmia4_train_val_test\\currentecg_inference\\currentecg_predictions.csv",
+    "prediction_distribution_csv": "data\\processed\\models\\hybrid_cnn1d_arrhythmia4_train_val_test\\currentecg_inference\\prediction_distribution.csv",
+    "confidence_distribution_csv": "data\\processed\\models\\hybrid_cnn1d_arrhythmia4_train_val_test\\currentecg_inference\\confidence_distribution.csv",
+    "prediction_distribution_png": "data\\processed\\models\\hybrid_cnn1d_arrhythmia4_train_val_test\\currentecg_inference\\prediction_distribution.png"
+  },
+  "device": "cpu"
+}

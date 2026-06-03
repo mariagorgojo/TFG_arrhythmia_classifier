@@ -54,6 +54,23 @@ before training.
 
 ## Train The Hybrid Model
 
+For the final device-disjoint train/validation/test protocol:
+
+```powershell
+python -m arrhythmia_classifier.hybrid_cnn1d_train_val_test --dataset-path datasets\ecg_training_dataset_arrhythmia4_features_deidentified.npz --output-dir results\hybrid_cnn1d_arrhythmia4_train_val_test
+```
+
+This final protocol:
+
+- learns model parameters from train device groups;
+- selects the best checkpoint using validation macro F1;
+- evaluates the test groups once at the end of the corrected run.
+
+The test groups match the historical two-way prototype holdout. The reported
+score is an internal evaluation, not an external validation cohort.
+
+The earlier two-way prototype is preserved for historical comparison:
+
 ```powershell
 python -m arrhythmia_classifier.hybrid_cnn1d_classifier --dataset-path datasets\ecg_training_dataset_arrhythmia4_features_deidentified.npz --output-dir results\hybrid_cnn1d_arrhythmia4
 ```
@@ -81,7 +98,7 @@ appropriate review.
 Example:
 
 ```powershell
-python -m arrhythmia_classifier.currentecg_inference --manifest-path D:\private_data\occurrence_dataset\occurrences_manifest.csv --model-path model\hybrid_cnn1d_model.pt --output-dir results\currentecg_exploratory
+python -m arrhythmia_classifier.currentecg_inference --manifest-path D:\private_data\occurrence_dataset\occurrences_manifest.csv --model-path model\hybrid_cnn1d_train_val_test_model.pt --output-dir results\currentecg_exploratory
 ```
 
 The output is exploratory only. The classifier has no confirmed NSR/normal or
