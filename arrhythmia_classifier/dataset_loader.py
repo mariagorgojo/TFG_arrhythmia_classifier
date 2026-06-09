@@ -177,9 +177,39 @@ def select_balanced_rows(
     rows: list[ManifestOccurrence],
     *,
     max_per_label: int | None,
+    selection_strategy: str = "first",
 ) -> list[ManifestOccurrence]:
     if max_per_label is None:
         return rows
+    if selection_strategy == "device_round_robin":
+        rows_by_label_device: dict[str, dict[str, list[ManifestOccurrence]]] = defaultdict(
+            lambda: defaultdict(list)
+        )
+        label_order: list[str] = []
+        for row in rows:
+            if row.occurrence_type not in rows_by_label_device:
+                label_order.append(row.occurrence_type)
+            rows_by_label_device[row.occurrence_type][row.device_id].append(row)
+
+        selected: list[ManifestOccurrence] = []
+        for label in label_order:
+            label_selected: list[ManifestOccurrence] = []
+            device_rows = rows_by_label_device[label]
+            device_ids = sorted(device_rows)
+            while len(label_selected) < max_per_label:
+                added = False
+                for device_id in device_ids:
+                    if device_rows[device_id]:
+                        label_selected.append(device_rows[device_id].pop(0))
+                        added = True
+                        if len(label_selected) >= max_per_label:
+                            break
+                if not added:
+                    break
+            selected.extend(label_selected)
+        return selected
+    if selection_strategy != "first":
+        raise ValueError(f"Unknown selection strategy: {selection_strategy}")
 
     selected: list[ManifestOccurrence] = []
     counts: dict[str, int] = defaultdict(int)
@@ -303,6 +333,7 @@ def build_training_dataset(
     required_sampling_rate_hz: float | None = DEFAULT_REQUIRED_SAMPLING_RATE_HZ,
     min_samples: int = 256,
     max_per_label: int | None = 5000,
+    selection_strategy: str = "first",
 ) -> PreparedDatasetSummary:
     rows = read_manifest(manifest_path)
     if label_mapping is None:
@@ -313,7 +344,11 @@ def build_training_dataset(
         required_sampling_rate_hz=required_sampling_rate_hz,
         min_samples=min_samples,
     )
-    selected = select_balanced_rows(filtered, max_per_label=max_per_label)
+    selected = select_balanced_rows(
+        filtered,
+        max_per_label=max_per_label,
+        selection_strategy=selection_strategy,
+    )
 
     label_to_index = {label: index for index, label in enumerate(labels)}
     X = np.zeros((len(selected), target_samples), dtype=np.float32)
@@ -390,6 +425,7 @@ def build_training_dataset(
                     "required_sampling_rate_hz": required_sampling_rate_hz,
                     "min_samples": min_samples,
                     "max_per_label": max_per_label,
+                    "selection_strategy": selection_strategy,
                 },
             },
             indent=2,
@@ -455,6 +491,16 @@ def build_parser() -> argparse.ArgumentParser:
         default=5000,
         help="Maximum examples per label. Use 0 to include all matching examples.",
     )
+    parser.add_argument(
+        "--selection-strategy",
+        choices=("first", "device_round_robin"),
+        default="first",
+        help=(
+            "How to choose rows when max-per-label is active. "
+            "'first' preserves the historical behavior; 'device_round_robin' "
+            "takes rows deterministically across device groups."
+        ),
+    )
     return parser
 
 
@@ -480,6 +526,7 @@ def main() -> int:
         required_sampling_rate_hz=required_sampling_rate_hz,
         min_samples=args.min_samples,
         max_per_label=max_per_label,
+        selection_strategy=args.selection_strategy,
     )
 
     print(f"Output dataset: {summary.output_path}")

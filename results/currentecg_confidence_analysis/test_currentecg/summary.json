@@ -1,0 +1,91 @@
+{
+  "dataset_path": "C:\\arritmias\\data\\processed\\training_dataset\\ecg_training_dataset_currentecg5_features.npz",
+  "model_path": "C:\\arritmias\\results\\hybrid_cnn1d_currentecg5_optuna\\hybrid_cnn1d_currentecg5_optuna_model.pt",
+  "subset": "test_currentecg",
+  "analyzed_records": 16542,
+  "labels": [
+    "CurrentECG",
+    "AF",
+    "Asystole",
+    "Brady",
+    "VT"
+  ],
+  "official_prediction_counts": {
+    "CurrentECG": 16542,
+    "AF": 0,
+    "Asystole": 0,
+    "Brady": 0,
+    "VT": 0
+  },
+  "top_non_current_counts": {
+    "AF": 25,
+    "Asystole": 16474,
+    "Brady": 0,
+    "VT": 43
+  },
+  "p_currentecg_summary": {
+    "min": 0.801962673664093,
+    "p01": 0.9999439120292664,
+    "p05": 0.9999927282333374,
+    "median": 1.0,
+    "mean": 0.9999252557754517,
+    "p95": 1.0,
+    "p99": 1.0,
+    "max": 1.0
+  },
+  "top_non_current_probability_summary": {
+    "min": 7.607676294485444e-11,
+    "p01": 1.5306005074489093e-10,
+    "p05": 2.603995075123322e-10,
+    "median": 2.307902757792135e-09,
+    "mean": 7.247221219586208e-05,
+    "p95": 7.246238510560943e-06,
+    "p99": 5.6107077398337424e-05,
+    "max": 0.1942349523305893
+  },
+  "confidence_margin_summary": {
+    "min": 0.6077277064323425,
+    "p01": 0.9998877644538879,
+    "p05": 0.9999854564666748,
+    "median": 1.0,
+    "mean": 0.9998527765274048,
+    "p95": 1.0,
+    "p99": 1.0,
+    "max": 1.0
+  },
+  "entropy_summary": {
+    "min": 1.1528413779160473e-09,
+    "p01": 2.2008175282195452e-09,
+    "p05": 3.6221337040842627e-09,
+    "median": 2.8575914967632343e-08,
+    "mean": 0.0001701057917671278,
+    "p95": 5.7803572417469695e-05,
+    "p99": 0.0003760949184652418,
+    "max": 0.32241949439048767
+  },
+  "low_confidence_counts": {
+    "p_currentecg_below_0.5": 0,
+    "p_currentecg_below_0.7": 0,
+    "p_currentecg_below_0.8": 0,
+    "p_currentecg_below_0.9": 6,
+    "p_currentecg_below_0.95": 7,
+    "p_currentecg_below_0.99": 20
+  },
+  "low_margin_counts": {
+    "margin_below_0.05": 0,
+    "margin_below_0.1": 0,
+    "margin_below_0.2": 0,
+    "margin_below_0.3": 0,
+    "margin_below_0.5": 0
+  },
+  "outputs": {
+    "summary_json": "results\\currentecg_confidence_analysis\\test_currentecg\\summary.json",
+    "lowest_currentecg_confidence_cases": "results\\currentecg_confidence_analysis\\test_currentecg\\lowest_currentecg_confidence_cases.csv",
+    "highest_non_current_probability_cases": "results\\currentecg_confidence_analysis\\test_currentecg\\highest_non_current_probability_cases.csv",
+    "highest_probability_by_alternative_label_cases": "results\\currentecg_confidence_analysis\\test_currentecg\\highest_probability_by_alternative_label_cases.csv",
+    "currentecg_probability_histogram": "results\\currentecg_confidence_analysis\\test_currentecg\\currentecg_probability_histogram.png",
+    "top_non_current_probability_histogram": "results\\currentecg_confidence_analysis\\test_currentecg\\top_non_current_probability_histogram.png",
+    "lowest_currentecg_confidence_examples": "results\\currentecg_confidence_analysis\\test_currentecg\\lowest_currentecg_confidence_examples.png",
+    "highest_non_current_probability_examples": "results\\currentecg_confidence_analysis\\test_currentecg\\highest_non_current_probability_examples.png"
+  }
+}

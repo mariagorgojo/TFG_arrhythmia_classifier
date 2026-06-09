@@ -1,22 +1,28 @@
 # TFG Arrhythmia Classifier
 
-Prototype for classifying four labeled arrhythmia types from single-lead ECG
-occurrence records:
+Prototype for classifying arrhythmia-related ECG occurrence records from
+single-lead Medtronic XML exports.
+
+The current active iteration uses five supervised labels:
 
 ```text
+CurrentECG
 AF
 Asystole
 Brady
 VT
 ```
 
-The current model is a hybrid 1D CNN. It combines:
+`CurrentECG` is kept as the original device/export label. In the current
+iteration it is treated operationally as the baseline/non-arrhythmic class under
+the tutor's assumption, but it is not renamed to clinically confirmed NSR.
+
+The current model is a hybrid 1D CNN optimized with Optuna. It combines:
 
 - a 2,048-sample ECG waveform window;
 - rhythm and marker features extracted from the same occurrence record.
 
-`CurrentECG` is not treated as a diagnostic class. It is analyzed separately as
-an unlabeled exploratory cohort.
+The previous four-arrhythmia model is preserved as historical comparison.
 
 ## Install
 
@@ -37,7 +43,7 @@ python -m pytest
 
 ## Dataset
 
-The shareable training-dataset candidate is:
+The historical four-arrhythmia shareable training-dataset candidate is:
 
 ```text
 datasets/ecg_training_dataset_arrhythmia4_features_deidentified.npz
@@ -52,7 +58,29 @@ Obtain the appropriate data-governance approval before uploading or sharing the
 is not committed, an authorized collaborator must place it in `datasets/`
 before training.
 
+The current five-class `CurrentECG` dataset is generated locally from the
+private XML-derived occurrence data and is not included in GitHub:
+
+```text
+data/processed/training_dataset/ecg_training_dataset_currentecg5_features.npz
+```
+
 ## Train The Hybrid Model
+
+For the current five-class protocol with `CurrentECG` as a supervised label:
+
+```powershell
+python -m arrhythmia_classifier.hybrid_cnn1d_currentecg5_optuna --dataset-path data\processed\training_dataset\ecg_training_dataset_currentecg5_features.npz --output-dir results\hybrid_cnn1d_currentecg5_optuna --n-trials 6 --trial-epochs 3 --final-epochs 10 --patience 4
+```
+
+This protocol:
+
+- uses train/validation/test groups separated by device;
+- uses validation macro F1 for Optuna and checkpoint selection;
+- evaluates the test groups once at the end;
+- stores aggregate reports and confusion matrices under `results/`.
+
+The required private dataset is not included in GitHub.
 
 For the final device-disjoint train/validation/test protocol:
 
@@ -88,7 +116,7 @@ The script:
 python -m arrhythmia_classifier.cnn1d_classifier --dataset-path datasets\ecg_training_dataset_arrhythmia4_features_deidentified.npz --output-dir results\cnn1d_arrhythmia4_baseline
 ```
 
-## Exploratory CurrentECG Inference
+## Historical Exploratory CurrentECG Inference
 
 `CurrentECG` inference requires the private occurrence manifest and extracted
 occurrence arrays. These files are not included in GitHub. The trained
@@ -101,7 +129,8 @@ Example:
 python -m arrhythmia_classifier.currentecg_inference --manifest-path D:\private_data\occurrence_dataset\occurrences_manifest.csv --model-path model\hybrid_cnn1d_train_val_test_model.pt --output-dir results\currentecg_exploratory
 ```
 
-The output is exploratory only. The classifier has no confirmed NSR/normal or
+This section belongs to the previous four-arrhythmia protocol. The output is
+exploratory only because that older classifier has no confirmed NSR/normal or
 other/indeterminate class and is forced to select one of the four available
 arrhythmia labels.
 
@@ -119,6 +148,12 @@ To build the four-class feature dataset:
 
 ```powershell
 python -m arrhythmia_classifier.dataset_loader --manifest-path D:\private_data\occurrence_dataset\occurrences_manifest.csv --label-strategy arrhythmia4 --output-path D:\private_data\ecg_training_dataset_arrhythmia4_features.npz --max-per-label 0
+```
+
+To build the current five-class feature dataset:
+
+```powershell
+python -m arrhythmia_classifier.dataset_loader --manifest-path D:\private_data\occurrence_dataset\occurrences_manifest.csv --label-strategy clinical5 --output-path data\processed\training_dataset\ecg_training_dataset_currentecg5_features.npz --max-per-label 0 --selection-strategy device_round_robin
 ```
 
 ## Repository Contents

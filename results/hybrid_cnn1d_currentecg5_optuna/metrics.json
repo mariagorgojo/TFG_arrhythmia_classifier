@@ -1,0 +1,336 @@
+{
+  "model_type": "TunableHybridCNN",
+  "dataset_path": "data\\processed\\training_dataset\\ecg_training_dataset_currentecg5_features.npz",
+  "model_path": "results\\hybrid_cnn1d_currentecg5_optuna\\hybrid_cnn1d_currentecg5_optuna_model.pt",
+  "evaluation_protocol": "device_disjoint_train_validation_test_with_optuna",
+  "currentecg_assumption": "CurrentECG is used as a supervised label and treated operationally as the device/export baseline-rhythm class, while preserving the original label name.",
+  "limitation": "Some CurrentECG strips may contain non-NSR rhythms or artifact. This introduces label noise that should be reviewed clinically.",
+  "validation_size_requested": 0.2,
+  "test_size_requested": 0.2,
+  "split_strategy": "stratified_group",
+  "random_state": 42,
+  "n_trials": 6,
+  "optuna_sampler": "TPESampler",
+  "optuna_startup_trials": 2,
+  "optuna_pruner": "MedianPruner",
+  "reference_trials": [
+    {
+      "conv_layers": 3,
+      "base_channels": 8,
+      "kernel_size": 11,
+      "rhythm_hidden": 32,
+      "dropout": 0.4,
+      "learning_rate": 0.0017,
+      "weight_decay": 0.001,
+      "batch_size": 64
+    },
+    {
+      "conv_layers": 2,
+      "base_channels": 32,
+      "kernel_size": 7,
+      "rhythm_hidden": 64,
+      "dropout": 0.35,
+      "learning_rate": 0.0024,
+      "weight_decay": 0.0001,
+      "batch_size": 256
+    },
+    {
+      "conv_layers": 4,
+      "base_channels": 8,
+      "kernel_size": 9,
+      "rhythm_hidden": 32,
+      "dropout": 0.4,
+      "learning_rate": 0.0028,
+      "weight_decay": 0.0001,
+      "batch_size": 64
+    }
+  ],
+  "trial_epochs": 3,
+  "final_epochs_requested": 10,
+  "final_epochs_completed": 10,
+  "best_trial_number": 0,
+  "best_trial_seed": 42,
+  "best_trial_validation_macro_f1": 0.9182531294522628,
+  "best_final_validation_macro_f1": 0.9409861867658206,
+  "best_hyperparameters": {
+    "conv_layers": 3,
+    "base_channels": 8,
+    "kernel_size": 11,
+    "rhythm_hidden": 32,
+    "dropout": 0.4,
+    "learning_rate": 0.0017,
+    "weight_decay": 0.001,
+    "batch_size": 64
+  },
+  "target_samples": 2048,
+  "rhythm_feature_names": [
+    "waveform_duration_seconds",
+    "marker_count",
+    "rr_count",
+    "rr_mean_seconds",
+    "rr_median_seconds",
+    "rr_std_seconds",
+    "rr_cv",
+    "rr_min_seconds",
+    "rr_max_seconds",
+    "heart_rate_mean_bpm",
+    "heart_rate_median_bpm",
+    "marker_vs_fraction",
+    "marker_bs_fraction",
+    "marker_vts_fraction",
+    "marker_vfs_fraction",
+    "marker_reject_fraction",
+    "raw_signal_std_mv",
+    "raw_signal_peak_to_peak_mv"
+  ],
+  "labels": [
+    "CurrentECG",
+    "AF",
+    "Asystole",
+    "Brady",
+    "VT"
+  ],
+  "train_examples": 62563,
+  "validation_examples": 20877,
+  "test_examples": 20821,
+  "train_device_count": 136,
+  "validation_device_count": 43,
+  "test_device_count": 45,
+  "train_label_counts": {
+    "CurrentECG": 49594,
+    "VT": 2988,
+    "Brady": 1114,
+    "Asystole": 5824,
+    "AF": 3043
+  },
+  "validation_label_counts": {
+    "CurrentECG": 16532,
+    "AF": 993,
+    "Asystole": 1958,
+    "VT": 931,
+    "Brady": 463
+  },
+  "test_label_counts": {
+    "CurrentECG": 16542,
+    "VT": 961,
+    "Asystole": 1943,
+    "AF": 1007,
+    "Brady": 368
+  },
+  "class_weights_from_train_only": {
+    "CurrentECG": 0.2523006796836853,
+    "AF": 4.111928939819336,
+    "Asystole": 2.1484546661376953,
+    "Brady": 11.232136726379395,
+    "VT": 4.187617301940918
+  },
+  "final_history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.3803095557382112,
+      "train_accuracy": 0.9398686124386618,
+      "validation_loss": 0.1553666234561344,
+      "validation_accuracy": 0.9660870814772238,
+      "validation_macro_f1": 0.8643588900074743,
+      "validation_weighted_f1": 0.9675541280615941
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.21293103831284868,
+      "train_accuracy": 0.9678723846362867,
+      "validation_loss": 0.11810201541505529,
+      "validation_accuracy": 0.9789241749293481,
+      "validation_macro_f1": 0.9080389969814828,
+      "validation_weighted_f1": 0.979494878559949
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.17986027448985964,
+      "train_accuracy": 0.9733388744145901,
+      "validation_loss": 0.10238484435365205,
+      "validation_accuracy": 0.9811275566412799,
+      "validation_macro_f1": 0.9182531294522628,
+      "validation_weighted_f1": 0.9815850872696502
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.16855181198631877,
+      "train_accuracy": 0.9740901171619009,
+      "validation_loss": 0.10227552710417354,
+      "validation_accuracy": 0.9769602912295828,
+      "validation_macro_f1": 0.9011862917703232,
+      "validation_weighted_f1": 0.9780866565374103
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.14872323050877076,
+      "train_accuracy": 0.9767913942745712,
+      "validation_loss": 0.11633143165605528,
+      "validation_accuracy": 0.9745653111079178,
+      "validation_macro_f1": 0.8911334065186056,
+      "validation_weighted_f1": 0.9759041323676162
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.14148724324592882,
+      "train_accuracy": 0.9789811869635408,
+      "validation_loss": 0.09423708273373085,
+      "validation_accuracy": 0.9775829860612157,
+      "validation_macro_f1": 0.9035305381095137,
+      "validation_weighted_f1": 0.9786731236379902
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.13081489754411862,
+      "train_accuracy": 0.9803717852404776,
+      "validation_loss": 0.09142768395761072,
+      "validation_accuracy": 0.9865881113186761,
+      "validation_macro_f1": 0.9375872598646809,
+      "validation_weighted_f1": 0.9866674334740158
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.13161174953531668,
+      "train_accuracy": 0.98067547911705,
+      "validation_loss": 0.09953764215126415,
+      "validation_accuracy": 0.9870671073430091,
+      "validation_macro_f1": 0.9409861867658206,
+      "validation_weighted_f1": 0.9870878540399002
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.1267070760801231,
+      "train_accuracy": 0.9817623835174144,
+      "validation_loss": 0.08540279811053685,
+      "validation_accuracy": 0.9807443598218135,
+      "validation_macro_f1": 0.91104777898107,
+      "validation_weighted_f1": 0.9814748771715068
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.11902356697547951,
+      "train_accuracy": 0.9830091268001854,
+      "validation_loss": 0.08931107223387318,
+      "validation_accuracy": 0.9811275566412799,
+      "validation_macro_f1": 0.9122708132823231,
+      "validation_weighted_f1": 0.9818735558342256
+    }
+  ],
+  "validation": {
+    "loss": 0.09953764215126415,
+    "accuracy": 0.9870671073430091,
+    "macro_f1": 0.9409861867658206,
+    "weighted_f1": 0.9870878540399002,
+    "classification_report": {
+      "CurrentECG": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1-score": 1.0,
+        "support": 16532.0
+      },
+      "AF": {
+        "precision": 1.0,
+        "recall": 0.8640483383685801,
+        "f1-score": 0.9270664505672609,
+        "support": 993.0
+      },
+      "Asystole": {
+        "precision": 0.9461108286731063,
+        "recall": 0.9504596527068437,
+        "f1-score": 0.94828025477707,
+        "support": 1958.0
+      },
+      "Brady": {
+        "precision": 0.817658349328215,
+        "recall": 0.9200863930885529,
+        "f1-score": 0.8658536585365854,
+        "support": 463.0
+      },
+      "VT": {
+        "precision": 0.9309309309309309,
+        "recall": 0.9989258861439313,
+        "f1-score": 0.9637305699481865,
+        "support": 931.0
+      },
+      "accuracy": 0.9870671073430091,
+      "macro avg": {
+        "precision": 0.9389400217864503,
+        "recall": 0.9467040540615816,
+        "f1-score": 0.9409861867658206,
+        "support": 20877.0
+      },
+      "weighted avg": {
+        "precision": 0.9878218860457731,
+        "recall": 0.9870671073430091,
+        "f1-score": 0.9870878540399002,
+        "support": 20877.0
+      }
+    },
+    "outputs": {
+      "classification_report": "results\\hybrid_cnn1d_currentecg5_optuna\\validation_classification_report.txt",
+      "confusion_matrix_csv": "results\\hybrid_cnn1d_currentecg5_optuna\\validation_confusion_matrix.csv",
+      "confusion_matrix_png": "results\\hybrid_cnn1d_currentecg5_optuna\\validation_confusion_matrix.png"
+    }
+  },
+  "test": {
+    "loss": 0.06800328274246405,
+    "accuracy": 0.9900100859708948,
+    "macro_f1": 0.937343142220881,
+    "weighted_f1": 0.9898081700944472,
+    "classification_report": {
+      "CurrentECG": {
+        "precision": 0.9998791102514507,
+        "recall": 1.0,
+        "f1-score": 0.9999395514719217,
+        "support": 16542.0
+      },
+      "AF": {
+        "precision": 0.9888551165146909,
+        "recall": 0.9692154915590864,
+        "f1-score": 0.9789368104312939,
+        "support": 1007.0
+      },
+      "Asystole": {
+        "precision": 0.9438877755511023,
+        "recall": 0.9696345856922285,
+        "f1-score": 0.9565879664889566,
+        "support": 1943.0
+      },
+      "Brady": {
+        "precision": 0.8317757009345794,
+        "recall": 0.7255434782608695,
+        "f1-score": 0.7750362844702468,
+        "support": 368.0
+      },
+      "VT": {
+        "precision": 0.9701952723535457,
+        "recall": 0.9823100936524454,
+        "f1-score": 0.9762150982419855,
+        "support": 961.0
+      },
+      "accuracy": 0.9900100859708948,
+      "macro avg": {
+        "precision": 0.9469185951210738,
+        "recall": 0.929340729832926,
+        "f1-score": 0.937343142220881,
+        "support": 20821.0
+      },
+      "weighted avg": {
+        "precision": 0.9897796650824294,
+        "recall": 0.9900100859708948,
+        "f1-score": 0.9898081700944472,
+        "support": 20821.0
+      }
+    },
+    "outputs": {
+      "classification_report": "results\\hybrid_cnn1d_currentecg5_optuna\\test_classification_report.txt",
+      "confusion_matrix_csv": "results\\hybrid_cnn1d_currentecg5_optuna\\test_confusion_matrix.csv",
+      "confusion_matrix_png": "results\\hybrid_cnn1d_currentecg5_optuna\\test_confusion_matrix.png"
+    }
+  },
+  "device": "cpu",
+  "outputs": {
+    "trials_csv": "results\\hybrid_cnn1d_currentecg5_optuna\\optuna_trials.csv",
+    "metrics_json": "results\\hybrid_cnn1d_currentecg5_optuna\\metrics.json"
+  }
+}

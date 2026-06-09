@@ -8,6 +8,7 @@ dependencies = [
   "scikit-learn",
   "torch",
   "Pillow",
+  "optuna",
 ]
 
 [build-system]

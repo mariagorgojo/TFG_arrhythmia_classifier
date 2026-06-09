@@ -1,0 +1,11 @@
+              precision    recall  f1-score   support
+
+  CurrentECG       1.00      1.00      1.00     16542
+          AF       0.99      0.97      0.98      1007
+    Asystole       0.94      0.97      0.96      1943
+       Brady       0.83      0.73      0.78       368
+          VT       0.97      0.98      0.98       961
+
+    accuracy                           0.99     20821
+   macro avg       0.95      0.93      0.94     20821
+weighted avg       0.99      0.99      0.99     20821

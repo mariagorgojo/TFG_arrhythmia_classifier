@@ -7,10 +7,12 @@ docs/
 currentecg_predictions.csv
 occurrences_manifest.csv
 raw_xml_manifest.csv
+results/currentecg_confidence_analysis/**/*cases*.csv
 
 # Dataset and model candidates require explicit review before staging
 datasets/*.npz
 model/*.pt
+*.pt
 
 # Local environments and generated files
 .pythonlibs/
@@ -19,6 +21,7 @@ model/*.pt
 __pycache__/
 *.pyc
 .pytest_cache/
+pytest_tmp*/
 .tmp/
 .matplotlib/
 .idea/
