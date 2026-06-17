@@ -1,3 +1,18 @@
+"""Final five-class hybrid CNN trained with Optuna hyperparameter search.
+
+This script is the most complete supervised model iteration in the project.
+It uses the dataset where ``CurrentECG`` is kept as one of the five labels,
+loads both ECG waveform samples and rhythm-derived numerical features, splits
+the data into train/validation/test groups by device, lets Optuna suggest
+hyperparameter combinations from a defined search space, trains the selected
+model, and writes the final metrics and confusion matrices.
+
+The important methodological idea is that the model is not selected using the
+test set. The validation set is used to choose the best epoch and the best
+hyperparameter configuration. The test set is kept aside and evaluated only at
+the end, so it gives a more honest estimate of final performance.
+"""
+
 from __future__ import annotations
 
 import argparse
@@ -13,8 +28,15 @@ from pathlib import Path
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 LOCAL_SITE_PACKAGES = PROJECT_ROOT / ".pythonlibs"
 
+# The project was developed on Windows with some packages installed locally in
+# `.pythonlibs`. This block makes the script able to find those packages when it
+# is executed from the project folder, without requiring a global installation.
 if LOCAL_SITE_PACKAGES.exists() and str(LOCAL_SITE_PACKAGES) not in sys.path:
     sys.path.append(str(LOCAL_SITE_PACKAGES))
+
+# PyTorch, NumPy and SciPy may need native Windows DLL files. Adding these
+# directories explicitly avoids import errors when the packages are stored in
+# the local project dependency folder.
 for dll_dir in (
     LOCAL_SITE_PACKAGES / "torch" / "lib",
     LOCAL_SITE_PACKAGES / "numpy.libs",
@@ -49,44 +71,19 @@ DEFAULT_DATASET_PATH = (
     PROJECT_ROOT / "data" / "processed" / "training_dataset"
     / "ecg_training_dataset_currentecg5_features.npz"
 )
-DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "results" / "hybrid_cnn1d_currentecg5_optuna"
-
-REFERENCE_TRIALS = [
-    {
-        "conv_layers": 3,
-        "base_channels": 8,
-        "kernel_size": 11,
-        "rhythm_hidden": 32,
-        "dropout": 0.40,
-        "learning_rate": 0.0017,
-        "weight_decay": 0.001,
-        "batch_size": 64,
-    },
-    {
-        "conv_layers": 2,
-        "base_channels": 32,
-        "kernel_size": 7,
-        "rhythm_hidden": 64,
-        "dropout": 0.35,
-        "learning_rate": 0.0024,
-        "weight_decay": 0.0001,
-        "batch_size": 256,
-    },
-    {
-        "conv_layers": 4,
-        "base_channels": 8,
-        "kernel_size": 9,
-        "rhythm_hidden": 32,
-        "dropout": 0.40,
-        "learning_rate": 0.0028,
-        "weight_decay": 0.0001,
-        "batch_size": 64,
-    },
-]
+DEFAULT_OUTPUT_DIR = PROJECT_ROOT / "results" / "hybrid_cnn1d_currentecg5_optuna_100trials"
+MIN_RECOMMENDED_TRIALS = 100
 
 
 @dataclass(frozen=True)
 class HyperParameters:
+    """One complete set of tunable choices for the model and training loop.
+
+    A dataclass is used so that the values selected by Optuna can be passed
+    around as one named object instead of as many independent variables. The
+    class is frozen because these values should not change once a trial starts.
+    """
+
     conv_layers: int
     base_channels: int
     kernel_size: int
@@ -95,10 +92,24 @@ class HyperParameters:
     learning_rate: float
     weight_decay: float
     batch_size: int
+    max_epochs: int
 
 
 class TunableHybridCNN(nn.Module):
-    """Hybrid CNN with Optuna-controlled capacity."""
+    """Hybrid neural network that combines ECG waveform and rhythm features.
+
+    The model has two branches:
+
+    1. ECG branch: receives the 2,048 ECG samples and applies one-dimensional
+       convolutional layers. This branch learns signal morphology and local
+       temporal patterns.
+    2. Rhythm branch: receives the manually extracted numerical features, such
+       as RR interval statistics and marker fractions. This branch gives the
+       model direct access to rhythm/timing information.
+
+    The two learned representations are concatenated and sent to the final
+    classifier, which outputs one score per class.
+    """
 
     def __init__(
         self,
@@ -111,11 +122,23 @@ class TunableHybridCNN(nn.Module):
         rhythm_hidden: int,
         dropout: float,
     ) -> None:
+        """Build all layers of the hybrid CNN.
+
+        The layer sizes are controlled by Optuna through the arguments received
+        here. This is why the class is called "Tunable": the same code can build
+        a smaller or larger network depending on the selected hyperparameters.
+        """
+
         super().__init__()
         padding = kernel_size // 2
         in_channels = 1
         conv_blocks: list[nn.Module] = []
         out_channels = base_channels
+
+        # The ECG is a one-channel time series, so Conv1d is the natural
+        # convolution type. Each block extracts temporal patterns, normalizes
+        # activations, applies a non-linear function, and then downsamples the
+        # signal length with max pooling.
         for layer_index in range(conv_layers):
             out_channels = min(base_channels * (2**layer_index), 128)
             conv_blocks.extend(
@@ -132,8 +155,17 @@ class TunableHybridCNN(nn.Module):
                 ]
             )
             in_channels = out_channels
+
+        # Adaptive average pooling compresses the remaining time dimension to
+        # one value per channel. This produces a fixed-size ECG representation
+        # regardless of the exact temporal length after pooling.
         conv_blocks.extend([nn.AdaptiveAvgPool1d(1), nn.Flatten()])
         self.ecg_branch = nn.Sequential(*conv_blocks)
+
+        # The rhythm branch is a small fully connected network. LayerNorm helps
+        # stabilize the numerical features after standardization, and dropout
+        # reduces overfitting by randomly disabling part of the representation
+        # during training.
         self.rhythm_branch = nn.Sequential(
             nn.Linear(num_rhythm_features, rhythm_hidden),
             nn.LayerNorm(rhythm_hidden),
@@ -142,12 +174,22 @@ class TunableHybridCNN(nn.Module):
             nn.Linear(rhythm_hidden, rhythm_hidden),
             nn.ReLU(),
         )
+
+        # The classifier receives both sources of information together. Its
+        # output is a vector of logits: one unnormalized score for each class.
         self.classifier = nn.Sequential(
             nn.Dropout(p=dropout),
             nn.Linear(out_channels + rhythm_hidden, num_classes),
         )
 
     def forward(self, ecg: torch.Tensor, rhythm_features: torch.Tensor) -> torch.Tensor:
+        """Run one batch through the model and return class logits.
+
+        PyTorch calls this method automatically when we write
+        ``model(ecg, rhythm_features)``. The highest output logit corresponds to
+        the predicted class before metrics are calculated.
+        """
+
         ecg_embedding = self.ecg_branch(ecg)
         rhythm_embedding = self.rhythm_branch(rhythm_features)
         return self.classifier(torch.cat([ecg_embedding, rhythm_embedding], dim=1))
@@ -162,6 +204,13 @@ def make_loader(
     batch_size: int,
     shuffle: bool,
 ) -> DataLoader:
+    """Create a PyTorch DataLoader for a selected subset of the dataset.
+
+    ``indices`` selects whether we are building the train, validation or test
+    subset. ``unsqueeze(1)`` adds the ECG channel dimension expected by Conv1d:
+    the waveform changes from ``batch x samples`` to ``batch x 1 x samples``.
+    """
+
     dataset = TensorDataset(
         torch.tensor(X[indices], dtype=torch.float32).unsqueeze(1),
         torch.tensor(rhythm_features[indices], dtype=torch.float32),
@@ -176,15 +225,25 @@ def evaluate(
     loss_fn: nn.Module,
     device: torch.device,
 ) -> tuple[float, float, np.ndarray, np.ndarray]:
+    """Evaluate the model without updating its weights.
+
+    This function is used for validation and test. ``model.eval()`` disables
+    training-specific behavior such as dropout, and ``torch.no_grad()`` prevents
+    PyTorch from storing gradients because we are only measuring performance.
+    """
+
     model.eval()
     total_loss = 0.0
     predictions: list[int] = []
     true_labels: list[int] = []
     with torch.no_grad():
         for X_batch, rhythm_batch, y_batch in loader:
+            # Move the current batch to CPU or GPU, depending on what is
+            # available. In this project run, the recorded device was CPU.
             X_batch = X_batch.to(device)
             rhythm_batch = rhythm_batch.to(device)
             y_batch = y_batch.to(device)
+
             logits = model(X_batch, rhythm_batch)
             loss = loss_fn(logits, y_batch)
             total_loss += float(loss.item()) * y_batch.size(0)
@@ -196,12 +255,19 @@ def evaluate(
 
 
 def train_one_epoch(
-    model: nn.Module,
-    loader: DataLoader,
-    loss_fn: nn.Module,
-    optimizer: torch.optim.Optimizer,
-    device: torch.device,
-) -> tuple[float, float]:
+            model: nn.Module,
+            loader: DataLoader,
+            loss_fn: nn.Module,
+            optimizer: torch.optim.Optimizer,
+            device: torch.device,
+        ) -> tuple[float, float]:
+    """Train the model for one full pass through the training subset.
+
+    One epoch means that every training ECG has been seen once. During each
+    batch, the model predicts logits, the loss function measures the error, the
+    gradient is calculated, and the optimizer updates the model weights.
+    """
+
     model.train()
     total_loss = 0.0
     predictions: list[int] = []
@@ -211,10 +277,16 @@ def train_one_epoch(
         rhythm_batch = rhythm_batch.to(device)
         y_batch = y_batch.to(device)
         optimizer.zero_grad()
+
+        # Forward pass: compute predictions for the current batch.
         logits = model(X_batch, rhythm_batch)
         loss = loss_fn(logits, y_batch)
+
+        # Backward pass: calculate how each trainable weight contributed to the
+        # loss, then let AdamW update those weights.
         loss.backward()
         optimizer.step()
+
         total_loss += float(loss.item()) * y_batch.size(0)
         predictions.extend(torch.argmax(logits, dim=1).detach().cpu().numpy().tolist())
         true_labels.extend(y_batch.detach().cpu().numpy().tolist())
@@ -223,7 +295,21 @@ def train_one_epoch(
     return mean_loss, accuracy
 
 
-def suggest_hyperparameters(trial: optuna.Trial) -> HyperParameters:
+def suggest_hyperparameters(
+    trial: optuna.Trial,
+    *,
+    min_epochs: int,
+    max_epochs: int,
+) -> HyperParameters:
+    """Define the hyperparameter search space explored by Optuna.
+
+    The selected ranges are intentionally limited. The aim is not to search an
+    enormous model space, but to compare realistic configurations that can be
+    trained locally and defended methodologically in a final degree project.
+    Every value is proposed by Optuna through `trial.suggest_*`; no fixed
+    reference configurations are manually queued.
+    """
+
     return HyperParameters(
         conv_layers=trial.suggest_int("conv_layers", 2, 4),
         base_channels=trial.suggest_categorical("base_channels", [8, 16, 32]),
@@ -233,25 +319,40 @@ def suggest_hyperparameters(trial: optuna.Trial) -> HyperParameters:
         learning_rate=trial.suggest_float("learning_rate", 1e-4, 3e-3, log=True),
         weight_decay=trial.suggest_categorical("weight_decay", [0.0, 1e-5, 1e-4, 1e-3]),
         batch_size=trial.suggest_categorical("batch_size", [64, 128, 256]),
+        max_epochs=trial.suggest_int("max_epochs", min_epochs, max_epochs),
     )
 
 
 def train_candidate(
-    *,
-    X: np.ndarray,
-    rhythm_features: np.ndarray,
-    y: np.ndarray,
-    labels: np.ndarray,
-    train_index: np.ndarray,
-    validation_index: np.ndarray,
-    params: HyperParameters,
-    epochs: int,
-    patience: int,
-    device: torch.device,
-    seed: int,
-    trial: optuna.Trial | None = None,
-) -> tuple[nn.Module, list[dict[str, float | int]], float]:
+        *,
+        X: np.ndarray,
+        rhythm_features: np.ndarray,
+        y: np.ndarray,
+        labels: np.ndarray,
+        train_index: np.ndarray,
+        validation_index: np.ndarray,
+        params: HyperParameters,
+        epochs: int,
+        patience: int,
+        device: torch.device,
+        seed: int,
+        trial: optuna.Trial | None = None,
+    ) -> tuple[nn.Module, list[dict[str, float | int]], float]:
+    """Train one candidate configuration and return its best validation score.
+
+    This function is used twice:
+
+    - during Optuna search, where each trial is a candidate model;
+    - after Optuna, where the best candidate is trained as the final model.
+
+    The quality criterion is validation macro F1, because the dataset is
+    imbalanced and macro F1 gives each class the same importance.
+    """
+
     set_reproducible_seed(seed)
+
+    # Build independent loaders for training and validation. Training is
+    # shuffled so the model does not see examples in the same order every epoch.
     train_loader = make_loader(
         X, rhythm_features, y, train_index, batch_size=params.batch_size, shuffle=True
     )
@@ -263,6 +364,8 @@ def train_candidate(
         batch_size=params.batch_size,
         shuffle=False,
     )
+
+    # Create the model with the hyperparameters of this candidate trial.
     model = TunableHybridCNN(
         num_classes=len(labels),
         num_rhythm_features=rhythm_features.shape[1],
@@ -272,8 +375,14 @@ def train_candidate(
         rhythm_hidden=params.rhythm_hidden,
         dropout=params.dropout,
     ).to(device)
+
+    # Class weights are calculated only from the training set. Minority classes
+    # receive larger weights so their errors influence the loss more strongly.
     class_weights = compute_class_weights(y[train_index], len(labels)).to(device)
     loss_fn = nn.CrossEntropyLoss(weight=class_weights)
+
+    # AdamW is used because it combines Adam optimization with decoupled weight
+    # decay, which is a standard way to regularize neural networks.
     optimizer = torch.optim.AdamW(
         model.parameters(),
         lr=params.learning_rate,
@@ -285,6 +394,8 @@ def train_candidate(
     epochs_without_improvement = 0
 
     for epoch in range(1, epochs + 1):
+        # Train one epoch, then evaluate on validation data that is not used to
+        # update the weights.
         train_loss, train_accuracy = train_one_epoch(
             model, train_loader, loss_fn, optimizer, device
         )
@@ -304,10 +415,16 @@ def train_candidate(
                 "validation_weighted_f1": weighted_f1,
             }
         )
+
+        # During Optuna search, intermediate validation scores are reported so
+        # the pruner can stop weak candidates early.
         if trial is not None:
             trial.report(macro_f1, step=epoch)
             if trial.should_prune():
                 raise optuna.TrialPruned()
+
+        # Keep a copy of the best validation epoch. If later epochs get worse,
+        # the model is restored to this best state before being returned.
         if macro_f1 > best_macro_f1:
             best_macro_f1 = macro_f1
             best_state = {
@@ -320,20 +437,29 @@ def train_candidate(
             if epochs_without_improvement >= patience:
                 break
 
+    # Restore the best validation epoch instead of keeping the final epoch
+    # automatically. This is a simple early-stopping strategy.
     if best_state is not None:
         model.load_state_dict(best_state)
     return model, history, best_macro_f1
 
 
 def write_report_outputs(
-    *,
-    output_dir: Path,
-    prefix: str,
-    title: str,
-    y_true: np.ndarray,
-    y_pred: np.ndarray,
-    labels: np.ndarray,
-) -> tuple[dict[str, object], dict[str, str]]:
+        *,
+        output_dir: Path,
+        prefix: str,
+        title: str,
+        y_true: np.ndarray,
+        y_pred: np.ndarray,
+        labels: np.ndarray,
+    ) -> tuple[dict[str, object], dict[str, str]]:
+    """Write the numerical and visual evaluation outputs for one subset.
+
+    The same function is used for validation and test outputs. It stores:
+    a text classification report, a confusion matrix CSV, and a PNG image of
+    the confusion matrix for easier inclusion in documentation.
+    """
+
     report_text = classification_report(
         y_true,
         y_pred,
@@ -364,6 +490,8 @@ def write_report_outputs(
 
 
 def write_trials_csv(path: Path, study: optuna.Study) -> None:
+    """Export the Optuna trials so the hyperparameter search is auditable."""
+
     rows = []
     for trial in study.trials:
         rows.append(
@@ -382,19 +510,36 @@ def write_trials_csv(path: Path, study: optuna.Study) -> None:
 
 
 def run_optimization(
-    dataset_path: Path,
-    output_dir: Path,
-    *,
-    validation_size: float,
-    test_size: float,
-    random_state: int,
-    n_trials: int,
-    trial_epochs: int,
-    final_epochs: int,
-    patience: int,
-    split_strategy: str,
-) -> dict[str, object]:
+        dataset_path: Path,
+        output_dir: Path,
+        *,
+        validation_size: float,
+        test_size: float,
+        random_state: int,
+        n_trials: int,
+        min_epochs: int,
+        max_epochs: int,
+        patience: int,
+        split_strategy: str,
+    ) -> dict[str, object]:
+    """Run the complete final experiment from dataset loading to saved metrics.
+
+    This is the main scientific workflow of the script:
+
+    1. Load the prepared supervised dataset.
+    2. Split it by device into train, validation and test.
+    3. Standardize rhythm features using only the training set statistics.
+    4. Use Optuna to suggest at least 100 hyperparameter combinations and select
+       the best one with validation macro F1.
+    5. Train the final model with the selected configuration.
+    6. Evaluate validation and test subsets.
+    7. Save the model checkpoint and all result files.
+    """
+
     set_reproducible_seed(random_state)
+
+    # Load arrays from the `.npz` dataset. X contains ECG samples, while
+    # rhythm_features contains the additional numerical variables.
     dataset = load_training_dataset(dataset_path)
     X = dataset["X"]
     rhythm_features = dataset["rhythm_features"]
@@ -402,6 +547,9 @@ def run_optimization(
     y = dataset["y"]
     labels = dataset["labels"]
     device_ids = dataset["device_ids"]
+
+    # The split is performed by device, not by individual ECG record. This
+    # avoids placing records from the same device in both training and test.
     train_index, validation_index, test_index = split_train_validation_test_by_device(
         X,
         y,
@@ -411,15 +559,25 @@ def run_optimization(
         random_state=random_state,
         split_strategy=split_strategy,
     )
+
+    # Standardization is fitted on the training set only, then applied to all
+    # subsets. This prevents information leakage from validation/test data.
     rhythm_features, rhythm_mean, rhythm_std = standardize_rhythm_features(
         rhythm_features,
         train_index,
     )
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     output_dir.mkdir(parents=True, exist_ok=True)
 
     def objective(trial: optuna.Trial) -> float:
-        params = suggest_hyperparameters(trial)
+        """Optuna objective: train one candidate and return validation macro F1."""
+
+        params = suggest_hyperparameters(
+            trial,
+            min_epochs=min_epochs,
+            max_epochs=max_epochs,
+        )
         _, _, best_macro_f1 = train_candidate(
             X=X,
             rhythm_features=rhythm_features,
@@ -428,15 +586,19 @@ def run_optimization(
             train_index=train_index,
             validation_index=validation_index,
             params=params,
-            epochs=trial_epochs,
-            patience=max(2, min(patience, trial_epochs)),
+            epochs=params.max_epochs,
+            patience=max(2, min(patience, params.max_epochs)),
             device=device,
             seed=random_state + trial.number,
             trial=trial,
         )
         return best_macro_f1
 
-    startup_trials = min(2, max(1, n_trials))
+    # TPESampler proposes new trials based on previous trial performance. The
+    # first startup trials are sampled without the TPE model so Optuna has an
+    # initial set of observations. The median pruner can stop candidates that
+    # are clearly underperforming after the warm-up epochs.
+    startup_trials = min(10, max(1, n_trials))
     study = optuna.create_study(
         study_name="currentecg5_hybrid_cnn",
         direction="maximize",
@@ -446,11 +608,15 @@ def run_optimization(
         ),
         pruner=optuna.pruners.MedianPruner(n_warmup_steps=2),
     )
-    for reference_trial in REFERENCE_TRIALS[:n_trials]:
-        study.enqueue_trial(reference_trial)
+
+    # No reference trials are enqueued here. Each candidate configuration is
+    # generated inside `suggest_hyperparameters()` with Optuna's `trial.suggest`
+    # API, which makes the search procedure independent from manually fixed
+    # starting architectures.
     study.optimize(objective, n_trials=n_trials, gc_after_trial=True)
     write_trials_csv(output_dir / "optuna_trials.csv", study)
 
+    # Train the final model using the best hyperparameters found by Optuna.
     best_params = HyperParameters(**study.best_trial.params)
     final_model, final_history, best_validation_macro_f1 = train_candidate(
         X=X,
@@ -460,11 +626,13 @@ def run_optimization(
         train_index=train_index,
         validation_index=validation_index,
         params=best_params,
-        epochs=final_epochs,
+        epochs=best_params.max_epochs,
         patience=patience,
         device=device,
         seed=random_state + study.best_trial.number,
     )
+
+    # Recreate the weighted loss and deterministic loaders for final evaluation.
     class_weights = compute_class_weights(y[train_index], len(labels)).to(device)
     loss_fn = nn.CrossEntropyLoss(weight=class_weights)
     validation_loader = make_loader(
@@ -489,6 +657,9 @@ def run_optimization(
     test_loss, test_accuracy, test_true, test_pred = evaluate(
         final_model, test_loader, loss_fn, device
     )
+
+    # Store validation and test reports separately. Validation explains model
+    # selection; test is the final held-out evaluation.
     validation_report, validation_outputs = write_report_outputs(
         output_dir=output_dir,
         prefix="validation",
@@ -505,6 +676,10 @@ def run_optimization(
         y_pred=test_pred,
         labels=labels,
     )
+
+    # The checkpoint is useful for future inference. It includes not only the
+    # learned weights, but also labels, feature names, preprocessing statistics
+    # and the selected hyperparameters needed to reproduce predictions.
     model_path = output_dir / "hybrid_cnn1d_currentecg5_optuna_model.pt"
     torch.save(
         {
@@ -523,8 +698,13 @@ def run_optimization(
         },
         model_path,
     )
+
     label_counts = lambda idx: dict(Counter(labels[y[idx]]))
     class_weight_values = class_weights.detach().cpu().numpy()
+
+    # metrics.json is the compact experiment record: dataset, split sizes,
+    # selected hyperparameters, class weights, training history and final
+    # validation/test results.
     metrics = {
         "model_type": "TunableHybridCNN",
         "dataset_path": str(dataset_path),
@@ -544,12 +724,18 @@ def run_optimization(
         "split_strategy": split_strategy,
         "random_state": random_state,
         "n_trials": n_trials,
+        "minimum_recommended_trials": MIN_RECOMMENDED_TRIALS,
+        "manual_reference_trials_used": False,
+        "hyperparameter_suggestion_method": "All optimized values are generated with trial.suggest_*.",
         "optuna_sampler": "TPESampler",
         "optuna_startup_trials": startup_trials,
         "optuna_pruner": "MedianPruner",
-        "reference_trials": REFERENCE_TRIALS[:n_trials],
-        "trial_epochs": trial_epochs,
-        "final_epochs_requested": final_epochs,
+        "epoch_search_range": {
+            "min_epochs": min_epochs,
+            "max_epochs": max_epochs,
+        },
+        "selected_max_epochs": best_params.max_epochs,
+        "final_epochs_requested": best_params.max_epochs,
         "final_epochs_completed": len(final_history),
         "best_trial_number": study.best_trial.number,
         "best_trial_seed": random_state + study.best_trial.number,
@@ -608,6 +794,8 @@ def run_optimization(
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """Create the command-line interface for reproducible script execution."""
+
     parser = argparse.ArgumentParser(
         description=(
             "Optimize and train a five-class hybrid CNN using CurrentECG as a supervised label."
@@ -623,15 +811,26 @@ def build_parser() -> argparse.ArgumentParser:
         default="stratified_group",
     )
     parser.add_argument("--random-state", type=int, default=42)
-    parser.add_argument("--n-trials", type=int, default=8)
-    parser.add_argument("--trial-epochs", type=int, default=8)
-    parser.add_argument("--final-epochs", type=int, default=20)
+    parser.add_argument("--n-trials", type=int, default=MIN_RECOMMENDED_TRIALS)
+    parser.add_argument("--min-epochs", type=int, default=6)
+    parser.add_argument("--max-epochs", type=int, default=20)
     parser.add_argument("--patience", type=int, default=5)
     return parser
 
 
 def main() -> int:
-    args = build_parser().parse_args()
+    """Parse command-line arguments, run the experiment, and print a summary."""
+
+    parser = build_parser()
+    args = parser.parse_args()
+    if args.min_epochs > args.max_epochs:
+        parser.error("--min-epochs must be lower than or equal to --max-epochs")
+    if args.n_trials < MIN_RECOMMENDED_TRIALS:
+        print(
+            "Warning: fewer than 100 trials were requested. This is useful for a "
+            "quick technical check, but the defended experiment should use at "
+            "least 100 trials."
+        )
     metrics = run_optimization(
         args.dataset_path,
         args.output_dir,
@@ -639,13 +838,14 @@ def main() -> int:
         test_size=args.test_size,
         random_state=args.random_state,
         n_trials=args.n_trials,
-        trial_epochs=args.trial_epochs,
-        final_epochs=args.final_epochs,
+        min_epochs=args.min_epochs,
+        max_epochs=args.max_epochs,
         patience=args.patience,
         split_strategy=args.split_strategy,
     )
     print(f"Model: {metrics['model_path']}")
     print(f"Best hyperparameters: {metrics['best_hyperparameters']}")
+    print(f"Selected max epochs: {metrics['selected_max_epochs']}")
     print(f"Validation macro F1: {metrics['validation']['macro_f1']:.4f}")
     print(f"Test accuracy: {metrics['test']['accuracy']:.4f}")
     print(f"Test macro F1: {metrics['test']['macro_f1']:.4f}")
