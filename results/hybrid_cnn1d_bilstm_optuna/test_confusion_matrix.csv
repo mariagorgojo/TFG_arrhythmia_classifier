@@ -1,0 +1,6 @@
+true_label,predicted_CurrentECG,predicted_AF,predicted_Asystole,predicted_Brady,predicted_VT
+CurrentECG,16795,70,1,0,0
+AF,1,1031,0,0,1
+Asystole,0,1,2004,28,3
+Brady,0,1,16,766,1
+VT,0,15,6,0,808

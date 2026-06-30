@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="990" height="840" viewBox="0 0 990 840">
+<defs>
+<style>.axis{font-family:Arial,Helvetica,sans-serif;font-size:25px;fill:#000}.tick{font-family:Arial,Helvetica,sans-serif;font-size:23px;fill:#000}.celltext{font-family:Arial,Helvetica,sans-serif;font-size:23px;text-anchor:middle;dominant-baseline:middle}.bold{font-weight:700}.smalltick{font-family:Arial,Helvetica,sans-serif;font-size:23px;fill:#000}</style>
+<linearGradient id="bar" x1="0" x2="0" y1="1" y2="0">
+<stop offset="0%" stop-color="#f7fbff"/>
+<stop offset="12.5%" stop-color="#deebf7"/>
+<stop offset="25%" stop-color="#c6dbef"/>
+<stop offset="37.5%" stop-color="#9ecae1"/>
+<stop offset="50%" stop-color="#6baed6"/>
+<stop offset="62.5%" stop-color="#4292c6"/>
+<stop offset="75%" stop-color="#2171b5"/>
+<stop offset="87.5%" stop-color="#08519c"/>
+<stop offset="100%" stop-color="#08306b"/>
+</linearGradient>
+</defs>
+<rect x="0" y="0" width="990" height="840" fill="#ffffff"/>
+<rect x="166.000" y="30.000" width="132.800" height="132.800" fill="#08316d"/>
+<text class="celltext bold" x="232.400" y="96.400" fill="#ffffff">16,795</text>
+<rect x="298.800" y="30.000" width="132.800" height="132.800" fill="#f6faff"/>
+<text class="celltext" x="365.200" y="96.400" fill="#0f2d47">70</text>
+<rect x="431.600" y="30.000" width="132.800" height="132.800" fill="#f7fbff"/>
+<text class="celltext" x="498.000" y="96.400" fill="#0f2d47">1</text>
+<rect x="564.400" y="30.000" width="132.800" height="132.800" fill="#f7fbff"/>
+<text class="celltext" x="630.800" y="96.400" fill="#0f2d47">0</text>
+<rect x="697.200" y="30.000" width="132.800" height="132.800" fill="#f7fbff"/>
+<text class="celltext" x="763.600" y="96.400" fill="#0f2d47">0</text>
+<rect x="166.000" y="162.800" width="132.800" height="132.800" fill="#f7fbff"/>
+<text class="celltext" x="232.400" y="229.200" fill="#0f2d47">1</text>
+<rect x="298.800" y="162.800" width="132.800" height="132.800" fill="#08316c"/>
+<text class="celltext bold" x="365.200" y="229.200" fill="#ffffff">1,031</text>
+<rect x="431.600" y="162.800" width="132.800" height="132.800" fill="#f7fbff"/>
+<text class="celltext" x="498.000" y="229.200" fill="#0f2d47">0</text>
+<rect x="564.400" y="162.800" width="132.800" height="132.800" fill="#f7fbff"/>
+<text class="celltext" x="630.800" y="229.200" fill="#0f2d47">0</text>
+<rect x="697.200" y="162.800" width="132.800" height="132.800" fill="#f7fbff"/>
+<text class="celltext" x="763.600" y="229.200" fill="#0f2d47">1</text>
+<rect x="166.000" y="295.600" width="132.800" height="132.800" fill="#f7fbff"/>
+<text class="celltext" x="232.400" y="362.000" fill="#0f2d47">0</text>
+<rect x="298.800" y="295.600" width="132.800" height="132.800" fill="#f7fbff"/>
+<text class="celltext" x="365.200" y="362.000" fill="#0f2d47">1</text>
+<rect x="431.600" y="295.600" width="132.800" height="132.800" fill="#083471"/>
+<text class="celltext bold" x="498.000" y="362.000" fill="#ffffff">2,004</text>
+<rect x="564.400" y="295.600" width="132.800" height="132.800" fill="#f4f9fe"/>
+<text class="celltext" x="630.800" y="362.000" fill="#0f2d47">28</text>
+<rect x="697.200" y="295.600" width="132.800" height="132.800" fill="#f7fbff"/>
+<text class="celltext" x="763.600" y="362.000" fill="#0f2d47">3</text>
+<rect x="166.000" y="428.400" width="132.800" height="132.800" fill="#f7fbff"/>
+<text class="celltext" x="232.400" y="494.800" fill="#0f2d47">0</text>
+<rect x="298.800" y="428.400" width="132.800" height="132.800" fill="#f7fbff"/>
+<text class="celltext" x="365.200" y="494.800" fill="#0f2d47">1</text>
+<rect x="431.600" y="428.400" width="132.800" height="132.800" fill="#f3f8fe"/>
+<text class="celltext" x="498.000" y="494.800" fill="#0f2d47">16</text>
+<rect x="564.400" y="428.400" width="132.800" height="132.800" fill="#083674"/>
+<text class="celltext bold" x="630.800" y="494.800" fill="#ffffff">766</text>
+<rect x="697.200" y="428.400" width="132.800" height="132.800" fill="#f7fbff"/>
+<text class="celltext" x="763.600" y="494.800" fill="#0f2d47">1</text>
+<rect x="166.000" y="561.200" width="132.800" height="132.800" fill="#f7fbff"/>
+<text class="celltext" x="232.400" y="627.600" fill="#0f2d47">0</text>
+<rect x="298.800" y="561.200" width="132.800" height="132.800" fill="#f3f9fe"/>
+<text class="celltext" x="365.200" y="627.600" fill="#0f2d47">15</text>
+<rect x="431.600" y="561.200" width="132.800" height="132.800" fill="#f6faff"/>
+<text class="celltext" x="498.000" y="627.600" fill="#0f2d47">6</text>
+<rect x="564.400" y="561.200" width="132.800" height="132.800" fill="#f7fbff"/>
+<text class="celltext" x="630.800" y="627.600" fill="#0f2d47">0</text>
+<rect x="697.200" y="561.200" width="132.800" height="132.800" fill="#083775"/>
+<text class="celltext bold" x="763.600" y="627.600" fill="#ffffff">808</text>
+<rect x="166" y="30" width="664" height="664" fill="none" stroke="#000" stroke-width="2"/>
+<text class="tick" x="151" y="104.400" text-anchor="end">CurrentECG</text>
+<text class="tick" x="151" y="237.200" text-anchor="end">AF</text>
+<text class="tick" x="151" y="370.000" text-anchor="end">Asystole</text>
+<text class="tick" x="151" y="502.800" text-anchor="end">Brady</text>
+<text class="tick" x="151" y="635.600" text-anchor="end">VT</text>
+<text class="tick" x="232.400" y="728" text-anchor="end" transform="rotate(-35 232.400 728)">CurrentECG</text>
+<text class="tick" x="365.200" y="728" text-anchor="end" transform="rotate(-35 365.200 728)">AF</text>
+<text class="tick" x="498.000" y="728" text-anchor="end" transform="rotate(-35 498.000 728)">Asystole</text>
+<text class="tick" x="630.800" y="728" text-anchor="end" transform="rotate(-35 630.800 728)">Brady</text>
+<text class="tick" x="763.600" y="728" text-anchor="end" transform="rotate(-35 763.600 728)">VT</text>
+<text class="axis" x="498.000" y="812" text-anchor="middle">Predicted label</text>
+<text class="axis" x="16" y="362.000" text-anchor="middle" transform="rotate(-90 16 362.000)">True label</text>
+<rect x="858" y="30" width="34" height="664" fill="url(#bar)" stroke="#000" stroke-width="1.4"/>
+<line x1="892" x2="900" y1="694.000" y2="694.000" stroke="#000" stroke-width="2"/>
+<text class="smalltick" x="908" y="702.000">0.0</text>
+<line x1="892" x2="900" y1="561.200" y2="561.200" stroke="#000" stroke-width="2"/>
+<text class="smalltick" x="908" y="569.200">0.2</text>
+<line x1="892" x2="900" y1="428.400" y2="428.400" stroke="#000" stroke-width="2"/>
+<text class="smalltick" x="908" y="436.400">0.4</text>
+<line x1="892" x2="900" y1="295.600" y2="295.600" stroke="#000" stroke-width="2"/>
+<text class="smalltick" x="908" y="303.600">0.6</text>
+<line x1="892" x2="900" y1="162.800" y2="162.800" stroke="#000" stroke-width="2"/>
+<text class="smalltick" x="908" y="170.800">0.8</text>
+<line x1="892" x2="900" y1="30.000" y2="30.000" stroke="#000" stroke-width="2"/>
+<text class="smalltick" x="908" y="38.000">1.0</text>
+<text class="axis" x="964" y="362.0" text-anchor="middle" transform="rotate(-90 964 362.0)">Proportion within true class (recall)</text>
+</svg>
