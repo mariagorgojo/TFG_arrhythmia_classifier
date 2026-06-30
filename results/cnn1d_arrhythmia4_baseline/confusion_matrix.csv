@@ -1,5 +1,0 @@
-true_label,predicted_AF,predicted_Asystole,predicted_Brady,predicted_VT
-AF,712,266,1,26
-Asystole,140,1265,503,37
-Brady,0,106,255,0
-VT,131,211,0,634
