@@ -1,192 +1,213 @@
 # TFG Arrhythmia Classifier
 
-Prototype for classifying arrhythmia-related ECG occurrence records from
-single-lead Medtronic XML exports.
+Machine-learning pipeline for classifying arrhythmia-related ECG occurrence
+records exported from Medtronic Reveal LINQ and LINQ II insertable cardiac
+monitors.
 
-The current active iteration uses five supervised labels:
+This repository supports the final degree project:
+Development of a Machine Learning-based arrhythmia classifier using data from
+Medtronic LINQ insertable cardiac monitors
 
-```text
-CurrentECG
-AF
-Asystole
-Brady
-VT
-```
 
-`CurrentECG` is kept as the original device/export label. In the current
-iteration it is treated operationally as the baseline/non-arrhythmic class under
-the tutor's assumption, but it is not renamed to clinically confirmed NSR.
+The active thesis task uses five supervised labels:
 
-The current model is a hybrid 1D CNN optimized with Optuna. It combines:
+- CurrentECG
+- AF
+- Asystole
+- Brady
+- VT
 
-- a 2,048-sample ECG waveform window;
-- rhythm and marker features extracted from the same occurrence record.
+CurrentECG is preserved as the original device/export label. In this project
+it is treated operationally as the baseline class, but it is not renamed as
+clinically confirmed normal sinus rhythm.
 
-The previous four-arrhythmia model is preserved as historical comparison.
+## Results
 
-## Install
+The thesis draft reports a hybrid CNN-BiLSTM as the selected final model and a
+150-trial hybrid CNN as the convolutional baseline.
+
+This repository includes aggregate result artifacts. The source clinical data
+used to derive the training dataset are not included.
+
+| Result folder | Role |
+|---|---|
+| results/hybrid_cnn1d_bilstm_optuna/ | Selected CNN-BiLSTM test result artifacts. |
+| results/hybrid_cnn1d_currentecg5_optuna_150trials/ | 150-trial hybrid CNN baseline artifacts. |
+| results/hybrid_cnn1d_currentecg5_optuna_100trials/ | Earlier 100-trial hybrid CNN run; historical/intermediate. |
+
+Final test-set performance reported in the thesis:
+
+| Metric | Hybrid CNN baseline | CNN-BiLSTM selected model |
+|---|---:|---:|
+| Accuracy | 0.991 | 0.993 |
+| Macro F1 | 0.966 | 0.980 |
+| Weighted F1 | 0.991 | 0.993 |
+| Arrhythmia-only macro F1 | 0.958 | 0.975 |
+
+Per-class performance of the selected CNN-BiLSTM:
+
+| Class | Precision | Recall | F1-score | Support |
+|---|---:|---:|---:|---:|
+| CurrentECG | 1.000 | 0.996 | 0.998 | 16,866 |
+| AF | 0.922 | 0.998 | 0.959 | 1,033 |
+| Asystole | 0.989 | 0.984 | 0.986 | 2,036 |
+| Brady | 0.965 | 0.977 | 0.971 | 784 |
+| VT | 0.994 | 0.975 | 0.984 | 829 |
+
+The main remaining errors in the selected model are:
+
+- Asystole predicted as Brady: 28 records.
+- Brady predicted as Asystole: 16 records.
+- CurrentECG or VT records over-called as AF: 85 records.
+
+## Repository Structure And Reproducibility
+
+### arrhythmia_classifier/
+
+| File | Role |
+|---|---|
+| `dataset_builder.py` | Extracts occurrence-level records from Medtronic XML exports. |
+| `dataset_loader.py` | Builds supervised ECG datasets from extracted occurrence records. |
+| `cnn1d_classifier.py` | Historical waveform-only CNN baseline. |
+| `hybrid_cnn1d_classifier.py` | Historical hybrid CNN model using ECG waveform and rhythm features. |
+| `hybrid_cnn1d_train_val_test.py` | Device-disjoint train/validation/test splitting and evaluation helpers. |
+| `hybrid_cnn1d_currentecg5_optuna.py` | Five-class Optuna hybrid CNN baseline. |
+| `hybrid_cnn_bilstm_optuna.py` | Five-class CNN-BiLSTM selected model. |
+| `plot_ecg_examples.py` | Generates representative ECG example plots. |
+
+### results/
+
+| Folder | Role |
+|---|---|
+| `results/hybrid_cnn1d_bilstm_optuna/` | Selected CNN-BiLSTM aggregate result. |
+| `results/hybrid_cnn1d_currentecg5_optuna_150trials/` | Hybrid CNN baseline aggregate result. |
+| `results/hybrid_cnn1d_currentecg5_optuna_100trials/` | Earlier intermediate 100-trial run. |
+
+### tests/
+
+| File | Role |
+|---|---|
+| `tests/test_dataset_builder.py` | Synthetic XML extraction test. |
+
+### dataset/
+
+| File | Role |
+|---|---|
+| `dataset/export_pseudonymized_currentecg5_dataset.py` | Exports the final five-class dataset with generic device groups and removed occurrence IDs. |
+
+The final models require the five-class ECG dataset. A pseudonymized dataset
+export helper is included to support controlled sharing of the derived dataset.
+The pseudonymized dataset remains clinical signal data because it contains ECG
+waveforms and rhythm-derived features.
+
+Raw XML/PDD exports, patient spreadsheets, full occurrence arrays, derived ECG
+datasets and trained model checkpoints are excluded from the public repository
+unless explicitly reviewed for sharing.
+
+## Data Pipeline
+
+The XML processing pipeline is:
+
+1. Extract cardiac occurrences from Medtronic XML exports.
+2. Store each occurrence waveform as a compressed NumPy array.
+3. Write an occurrence manifest with metadata, device group and label.
+4. Filter usable records to 128 Hz stored ECG waveforms.
+5. Encode each ECG as a fixed 2,048-sample window.
+6. Compute rhythm-derived features from device-exported beat markers.
+7. Split train, validation and test sets by device to avoid leakage.
+
+The final supervised dataset contains 104,261 records:
+
+| Class | Records |
+|---|---:|
+| CurrentECG | 82,668 |
+| Asystole | 9,725 |
+| AF | 5,043 |
+| VT | 4,880 |
+| Brady | 1,945 |
+
+The dataset is not included in the repository because it is derived from
+clinical device exports.
+
+## Installation
+
+This repository has two requirement files:
+
+| File | Purpose |
+|---|---|
+| `requirements.txt` | Runtime dependencies for training and analysis. |
+| `requirements-dev.txt` | Runtime dependencies plus `pytest` for tests. |
 
 Create and activate a Python environment:
 
-```powershell
-python -m venv .venv312
-.\.venv312\Scripts\Activate.ps1
-python -m pip install -r requirements.txt
-```
+| Environment | Command |
+|---|---|
+| macOS/Linux | `python3 -m venv .venv` |
+| macOS/Linux | `source .venv/bin/activate` |
+| macOS/Linux | `python -m pip install --upgrade pip` |
+| macOS/Linux | `python -m pip install -r requirements.txt` |
 
-To run the reproducible extractor test:
+On Windows PowerShell:
 
-```powershell
-python -m pip install -r requirements-dev.txt
-python -m pytest
-```
+| Environment | Command |
+|---|---|
+| Windows PowerShell | `python -m venv .venv` |
+| Windows PowerShell | `.\.venv\Scripts\Activate.ps1` |
+| Windows PowerShell | `python -m pip install --upgrade pip` |
+| Windows PowerShell | `python -m pip install -r requirements.txt` |
 
-## Dataset
+Run the tests:
 
-The historical four-arrhythmia shareable training-dataset candidate is:
+| Step | Command |
+|---|---|
+| Install test dependencies | `python -m pip install -r requirements-dev.txt` |
+| Run tests | `python -m pytest` |
 
-```text
-datasets/ecg_training_dataset_arrhythmia4_features_deidentified.npz
-```
+## Rebuild Datasets From Private XML Files
 
-It contains ECG signals, rhythm features, labels and generic device groups for
-device-separated evaluation. Original occurrence identifiers were removed.
+Raw XML/PDD files are intentionally excluded from the repository. With an
+authorized local XML folder, rebuild occurrence arrays with:
 
-Important: ECG signals remain clinical data even after identifier removal.
-Obtain the appropriate data-governance approval before uploading or sharing the
-`.npz` file. The repository ignores this file by default. If the reviewed file
-is not committed, an authorized collaborator must place it in `datasets/`
-before training.
+| Step | Command |
+|---|---|
+| Extract XML occurrences | `python -m arrhythmia_classifier.dataset_builder --xml-dir /path/to/private/xml_exports --output-dir /path/to/private/occurrence_dataset` |
 
-The current five-class `CurrentECG` dataset is generated locally from the
-private XML-derived occurrence data and is not included in GitHub:
+Build the current five-class dataset:
 
-```text
-data/processed/training_dataset/ecg_training_dataset_currentecg5_features.npz
-```
+| Step | Command |
+|---|---|
+| Build five-class dataset | `python -m arrhythmia_classifier.dataset_loader --manifest-path /path/to/private/occurrence_dataset/occurrences_manifest.csv --label-strategy clinical5 --output-path /path/to/private/ecg_training_dataset_currentecg5_features.npz --max-per-label 0 --selection-strategy device_round_robin` |
 
-## Train The Hybrid Model
+## Train The Hybrid CNN Baseline
 
-For the current five-class protocol with `CurrentECG` as a supervised label, the
-hyperparameter search and model selection are run with:
+The code can reproduce the hybrid CNN baseline, provided the five-class dataset
+is available locally:
 
-```powershell
-python -m arrhythmia_classifier.hybrid_cnn1d_currentecg5_optuna --dataset-path data\processed\training_dataset\ecg_training_dataset_currentecg5_features.npz --output-dir results\hybrid_cnn1d_currentecg5_optuna_100trials --n-trials 100 --min-epochs 6 --max-epochs 20 --patience 5
-```
+| Step | Command |
+|---|---|
+| Train hybrid CNN baseline | `python -m arrhythmia_classifier.hybrid_cnn1d_currentecg5_optuna --dataset-path /path/to/private/ecg_training_dataset_currentecg5_features.npz --output-dir results/hybrid_cnn1d_currentecg5_optuna_150trials --n-trials 150 --min-epochs 6 --max-epochs 20 --patience 5` |
 
-This protocol:
+## Tests
 
-- uses train/validation/test groups separated by device;
-- lets Optuna suggest hyperparameters and selects the best configuration by validation macro F1;
-- retrains the selected configuration and evaluates the test groups once at the end;
-- stores aggregate reports and confusion matrices under `results/`.
+The tests are intentionally small and do not require clinical data. They create
+a synthetic Medtronic-like XML file and verify that the extraction code
+preserves waveform sampling, amplitude scale, marker count and manifest output:
 
-The final model reported in the thesis extends this search to 150 trials (an
-additional 50 trials with a longer median-pruner warm-up) and retrains the best
-configuration. On the held-out test set it reaches accuracy 0.991 and macro F1
-0.966 (arrhythmia-only macro F1 0.958). The resulting checkpoint, metrics and
-confusion matrix are stored under
-`results\hybrid_cnn1d_currentecg5_optuna_150trials\`; the two-stage procedure is
-described in `ADDED_SCRIPTS.md`.
+| File | Role |
+|---|---|
+| `tests/conftest.py` | Adds the repository root to the Python path for tests. |
+| `tests/test_dataset_builder.py` | Tests extraction from a synthetic Medtronic-like XML file. |
 
-The required private dataset is not included in GitHub.
+## Notes For Thesis Interpretation
 
-For the final device-disjoint train/validation/test protocol:
+Accuracy and weighted F1 are high partly because `CurrentECG` is the majority
+class and is almost perfectly separated. Macro F1 and arrhythmia-only macro F1
+are therefore more informative for comparing rhythm discrimination.
 
-```powershell
-python -m arrhythmia_classifier.hybrid_cnn1d_train_val_test --dataset-path datasets\ecg_training_dataset_arrhythmia4_features_deidentified.npz --output-dir results\hybrid_cnn1d_arrhythmia4_train_val_test
-```
+The CNN-BiLSTM improves the slow-rhythm boundary between Asystole and Brady
+relative to the hybrid CNN baseline. AF has very high recall but lower precision
+because the selected model slightly over-predicts AF.
 
-This final protocol:
-
-- learns model parameters from train device groups;
-- selects the best checkpoint using validation macro F1;
-- evaluates the test groups once at the end of the corrected run.
-
-The test groups match the historical two-way prototype holdout. The reported
-score is an internal evaluation, not an external validation cohort.
-
-The earlier two-way prototype is preserved for historical comparison:
-
-```powershell
-python -m arrhythmia_classifier.hybrid_cnn1d_classifier --dataset-path datasets\ecg_training_dataset_arrhythmia4_features_deidentified.npz --output-dir results\hybrid_cnn1d_arrhythmia4
-```
-
-The script:
-
-- separates train/test records by generic device group;
-- uses class weights to reduce majority-class bias;
-- selects the best checkpoint using macro F1;
-- writes a classification report and confusion matrix.
-
-## Train The Waveform-Only Baseline
-
-```powershell
-python -m arrhythmia_classifier.cnn1d_classifier --dataset-path datasets\ecg_training_dataset_arrhythmia4_features_deidentified.npz --output-dir results\cnn1d_arrhythmia4_baseline
-```
-
-## Figures
-
-Utility scripts generate the per-class and error-analysis figures used in the report:
-
-```powershell
-python -m arrhythmia_classifier.plot_class_examples --dataset-path data\processed\training_dataset\ecg_training_dataset_currentecg5_features.npz --output-path figures\class_examples.png
-python -m arrhythmia_classifier.plot_misclassified --dataset-path data\processed\training_dataset\ecg_training_dataset_currentecg5_features.npz --model-path results\hybrid_cnn1d_currentecg5_optuna_150trials\hybrid_cnn1d_currentecg5_optuna_model.pt --output-path figures\misclassified_asystole_brady.png
-```
-
-`plot_class_examples` plots one real ECG strip per class from the prepared dataset.
-`plot_misclassified` plots test-set records misclassified between two classes
-(default Asystole versus Brady) using the trained checkpoint. See `ADDED_SCRIPTS.md`.
-
-## Historical Exploratory CurrentECG Inference
-
-`CurrentECG` inference requires the private occurrence manifest and extracted
-occurrence arrays. These files are not included in GitHub. The trained
-checkpoint is also ignored by default and must be placed in `model/` after the
-appropriate review.
-
-Example:
-
-```powershell
-python -m arrhythmia_classifier.currentecg_inference --manifest-path D:\private_data\occurrence_dataset\occurrences_manifest.csv --model-path model\hybrid_cnn1d_train_val_test_model.pt --output-dir results\currentecg_exploratory
-```
-
-This section belongs to the previous four-arrhythmia protocol. The output is
-exploratory only because that older classifier has no confirmed NSR/normal or
-other/indeterminate class and is forced to select one of the four available
-arrhythmia labels.
-
-## Rebuild From Private XML Files
-
-Raw XML/PDD files are intentionally excluded from GitHub.
-
-To rebuild occurrence arrays from an authorized local XML folder:
-
-```powershell
-python -m arrhythmia_classifier.dataset_builder --xml-dir D:\private_data\pdds --output-dir D:\private_data\occurrence_dataset
-```
-
-To build the four-class feature dataset:
-
-```powershell
-python -m arrhythmia_classifier.dataset_loader --manifest-path D:\private_data\occurrence_dataset\occurrences_manifest.csv --label-strategy arrhythmia4 --output-path D:\private_data\ecg_training_dataset_arrhythmia4_features.npz --max-per-label 0
-```
-
-To build the current five-class feature dataset:
-
-```powershell
-python -m arrhythmia_classifier.dataset_loader --manifest-path D:\private_data\occurrence_dataset\occurrences_manifest.csv --label-strategy clinical5 --output-path data\processed\training_dataset\ecg_training_dataset_currentecg5_features.npz --max-per-label 0 --selection-strategy device_round_robin
-```
-
-## Repository Contents
-
-```text
-arrhythmia_classifier/   active Python package
-datasets/                reviewed shareable dataset candidate
-figures/                 generated figures for the report
-model/                   reviewed trained-model candidate
-results/                 lightweight aggregate results
-```
-
-Private XML/PDD files, occurrence arrays, spreadsheets, local environments and
-record-level `CurrentECG` predictions must not be committed.
+This project is an academic prototype. It is not a clinical diagnostic system
+and would require clinical review, external validation and regulatory assessment
+before any clinical use.
