@@ -29,7 +29,7 @@ The thesis draft reports a hybrid CNN-BiLSTM as the selected final model and a
 This repository includes aggregate result artifacts. The source clinical data
 used to derive the training dataset are not included.
 
-| Result folder | Role |
+|Result folder |Role |
 |---|---|
 | results/hybrid_cnn1d_bilstm_optuna/ | Selected CNN-BiLSTM test result artifacts. |
 | results/hybrid_cnn1d_currentecg5_optuna_150trials/ | 150-trial hybrid CNN baseline artifacts. |
