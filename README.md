@@ -66,34 +66,34 @@ The main remaining errors in the selected model are:
 
 | File | Role |
 |---|---|
-| `dataset_builder.py` | Extracts occurrence-level records from Medtronic XML exports. |
-| `dataset_loader.py` | Builds supervised ECG datasets from extracted occurrence records. |
-| `cnn1d_classifier.py` | Historical waveform-only CNN baseline. |
-| `hybrid_cnn1d_classifier.py` | Historical hybrid CNN model using ECG waveform and rhythm features. |
-| `hybrid_cnn1d_train_val_test.py` | Device-disjoint train/validation/test splitting and evaluation helpers. |
-| `hybrid_cnn1d_currentecg5_optuna.py` | Five-class Optuna hybrid CNN baseline. |
-| `hybrid_cnn_bilstm_optuna.py` | Five-class CNN-BiLSTM selected model. |
-| `plot_ecg_examples.py` | Generates representative ECG example plots. |
-
-### results/
-
-| Folder | Role |
-|---|---|
-| `results/hybrid_cnn1d_bilstm_optuna/` | Selected CNN-BiLSTM aggregate result. |
-| `results/hybrid_cnn1d_currentecg5_optuna_150trials/` | Hybrid CNN baseline aggregate result. |
-| `results/hybrid_cnn1d_currentecg5_optuna_100trials/` | Earlier intermediate 100-trial run. |
-
-### tests/
-
-| File | Role |
-|---|---|
-| `tests/test_dataset_builder.py` | Synthetic XML extraction test. |
+| cnn1d_classifier.py | Historical waveform-only CNN baseline. |
+| hybrid_cnn1d_classifier.py | Historical hybrid CNN model using ECG waveform and rhythm features. |
+| hybrid_cnn1d_train_val_test.py | Device-disjoint train/validation/test splitting and evaluation helpers. |
+| hybrid_cnn1d_currentecg5_optuna.py | Five-class Optuna hybrid CNN baseline. |
+| hybrid_cnn_bilstm_optuna.py | Five-class CNN-BiLSTM selected model. |
+| plot_ecg_examples.py | Generates representative ECG example plots. |
 
 ### dataset/
 
 | File | Role |
 |---|---|
-| `dataset/export_pseudonymized_currentecg5_dataset.py` | Exports the final five-class dataset with generic device groups and removed occurrence IDs. |
+| dataset_builder.py | Extracts occurrence-level records from Medtronic XML exports. |
+| dataset_loader.py | Builds supervised ECG datasets from extracted occurrence records. |
+| export_pseudonymized_currentecg5_dataset.py | Exports the final five-class dataset with generic device groups and removed occurrence IDs. |
+
+### results/
+
+| Folder | Role |
+|---|---|
+| hybrid_cnn1d_bilstm_optuna/ | Selected CNN-BiLSTM aggregate result. |
+| hybrid_cnn1d_currentecg5_optuna_150trials/ | Hybrid CNN baseline aggregate result. |
+| hybrid_cnn1d_currentecg5_optuna_100trials/ | Earlier intermediate 100-trial run. |
+
+### tests/
+
+| File | Role |
+|---|---|
+| test_dataset_builder.py | Synthetic XML extraction test. |
 
 The final models require the five-class ECG dataset. A pseudonymized dataset
 export helper is included to support controlled sharing of the derived dataset.
@@ -135,8 +135,8 @@ This repository has two requirement files:
 
 | File | Purpose |
 |---|---|
-| `requirements.txt` | Runtime dependencies for training and analysis. |
-| `requirements-dev.txt` | Runtime dependencies plus `pytest` for tests. |
+| requirements.txt | Runtime dependencies for training and analysis. |
+| requirements-dev.txt | Runtime dependencies plus `pytest` for tests. |
 
 Create and activate a Python environment:
 
@@ -195,8 +195,8 @@ preserves waveform sampling, amplitude scale, marker count and manifest output:
 
 | File | Role |
 |---|---|
-| `tests/conftest.py` | Adds the repository root to the Python path for tests. |
-| `tests/test_dataset_builder.py` | Tests extraction from a synthetic Medtronic-like XML file. |
+| tests/conftest.py | Adds the repository root to the Python path for tests. |
+| tests/test_dataset_builder.py | Tests extraction from a synthetic Medtronic-like XML file. |
 
 ## Notes For Thesis Interpretation
 
