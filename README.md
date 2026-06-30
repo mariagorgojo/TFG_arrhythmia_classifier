@@ -62,7 +62,7 @@ The main remaining errors in the selected model are:
 
 ## Repository Structure And Reproducibility
 
-### arrhythmia_classifier/
+#### arrhythmia_classifier/
 
 | File | Role |
 |---|---|
@@ -73,7 +73,7 @@ The main remaining errors in the selected model are:
 | hybrid_cnn_bilstm_optuna.py | Five-class CNN-BiLSTM selected model. |
 | plot_ecg_examples.py | Generates representative ECG example plots. |
 
-### dataset/
+#### dataset/
 
 | File | Role |
 |---|---|
@@ -81,7 +81,7 @@ The main remaining errors in the selected model are:
 | dataset_loader.py | Builds supervised ECG datasets from extracted occurrence records. |
 | export_pseudonymized_currentecg5_dataset.py | Exports the final five-class dataset with generic device groups and removed occurrence IDs. |
 
-### results/
+#### results/
 
 | Folder | Role |
 |---|---|
@@ -89,7 +89,7 @@ The main remaining errors in the selected model are:
 | hybrid_cnn1d_currentecg5_optuna_150trials/ | Hybrid CNN baseline aggregate result. |
 | hybrid_cnn1d_currentecg5_optuna_100trials/ | Earlier intermediate 100-trial run. |
 
-### tests/
+#### tests/
 
 | File | Role |
 |---|---|
