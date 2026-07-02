@@ -1,0 +1,262 @@
+{
+  "model_type": "FrozenMOMENTFoundationClassifier",
+  "model_name": "AutonLab/MOMENT-1-small",
+  "dataset_path": "/content/tfg_trial/ecg_training_dataset_currentecg5_features.npz",
+  "head_path": "/content/drive/MyDrive/TFG_datasets/trial/results/foundation_moment_currentecg5_small/foundation_moment_currentecg5_head.pt",
+  "training_protocol": "frozen_moment_encoder_train_new_classification_head",
+  "last_layer_replacement": "head.linear",
+  "trainable_parameters": 2565,
+  "frozen_parameters": 35337408,
+  "original_target_samples": 2048,
+  "moment_context_length": 512,
+  "resize_method": "average_pool_factor_4",
+  "evaluation_protocol": "device_disjoint_train_validation_test",
+  "selection_metric": "validation_macro_f1",
+  "validation_size_requested": 0.2,
+  "test_size_requested": 0.2,
+  "split_strategy": "stratified_group",
+  "random_state": 42,
+  "labels": [
+    "CurrentECG",
+    "AF",
+    "Asystole",
+    "Brady",
+    "VT"
+  ],
+  "train_examples": 62205,
+  "validation_examples": 20508,
+  "test_examples": 21548,
+  "train_device_count": 135,
+  "validation_device_count": 44,
+  "test_device_count": 45,
+  "train_label_counts": {
+    "CurrentECG": 49343,
+    "VT": 3005,
+    "Brady": 514,
+    "AF": 3388,
+    "Asystole": 5955
+  },
+  "validation_label_counts": {
+    "CurrentECG": 16459,
+    "VT": 1046,
+    "Asystole": 1734,
+    "Brady": 647,
+    "AF": 622
+  },
+  "test_label_counts": {
+    "CurrentECG": 16866,
+    "AF": 1033,
+    "VT": 829,
+    "Brady": 784,
+    "Asystole": 2036
+  },
+  "class_weights_from_train_only": {
+    "CurrentECG": 0.2521330416202545,
+    "AF": 3.6720778942108154,
+    "Asystole": 2.0891687870025635,
+    "Brady": 24.204280853271484,
+    "VT": 4.140100002288818
+  },
+  "config": {
+    "model_name": "AutonLab/MOMENT-1-small",
+    "context_length": 512,
+    "epochs": 8,
+    "batch_size": 32,
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "patience": 3,
+    "random_state": 42,
+    "validation_size": 0.2,
+    "test_size": 0.2,
+    "split_strategy": "stratified_group"
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.868592886397352,
+      "train_accuracy": 0.8933526243871072,
+      "validation_loss": 0.7057182946027499,
+      "validation_accuracy": 0.9073044665496391,
+      "validation_macro_f1": 0.604807997408477,
+      "validation_weighted_f1": 0.9071294604350877
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.6375029835035233,
+      "train_accuracy": 0.9305843581705651,
+      "validation_loss": 0.6318676007498489,
+      "validation_accuracy": 0.9058903842402964,
+      "validation_macro_f1": 0.6098365974607911,
+      "validation_weighted_f1": 0.9053092999737151
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.568564188878029,
+      "train_accuracy": 0.9370307853066474,
+      "validation_loss": 0.6417947465363874,
+      "validation_accuracy": 0.9086210259410962,
+      "validation_macro_f1": 0.6208422438739003,
+      "validation_weighted_f1": 0.9092492057816863
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.5318110101601097,
+      "train_accuracy": 0.9401173539104574,
+      "validation_loss": 0.5922387539555694,
+      "validation_accuracy": 0.8998927247903258,
+      "validation_macro_f1": 0.5941611607151224,
+      "validation_weighted_f1": 0.9017501630528783
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.5013944451553666,
+      "train_accuracy": 0.9419339281408247,
+      "validation_loss": 0.5755713898837508,
+      "validation_accuracy": 0.9092061634484104,
+      "validation_macro_f1": 0.62429605737501,
+      "validation_weighted_f1": 0.9086216336024107
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.480080697458088,
+      "train_accuracy": 0.9425126597540391,
+      "validation_loss": 0.5987081332253926,
+      "validation_accuracy": 0.9036961185878681,
+      "validation_macro_f1": 0.610866954443361,
+      "validation_weighted_f1": 0.9045191255531378
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.4644631280837532,
+      "train_accuracy": 0.9422393698255768,
+      "validation_loss": 0.5794284812552389,
+      "validation_accuracy": 0.9076457967622391,
+      "validation_macro_f1": 0.6174358904962325,
+      "validation_weighted_f1": 0.9074851223349116
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.4528080883454245,
+      "train_accuracy": 0.9419821557752592,
+      "validation_loss": 0.5928688753510349,
+      "validation_accuracy": 0.9018431831480398,
+      "validation_macro_f1": 0.6139018356903259,
+      "validation_weighted_f1": 0.9038593668550102
+    }
+  ],
+  "validation": {
+    "loss": 0.5755713898837508,
+    "accuracy": 0.9092061634484104,
+    "macro_f1": 0.62429605737501,
+    "weighted_f1": 0.9086216336024107,
+    "arrhythmia_only_macro_f1": 0.5321924606362181,
+    "classification_report": {
+      "CurrentECG": {
+        "precision": 0.9884351282977955,
+        "recall": 0.9970229054013002,
+        "f1-score": 0.9927104443301775,
+        "support": 16459.0
+      },
+      "AF": {
+        "precision": 0.446524064171123,
+        "recall": 0.5369774919614148,
+        "f1-score": 0.48759124087591244,
+        "support": 622.0
+      },
+      "Asystole": {
+        "precision": 0.6638214051214708,
+        "recall": 0.583044982698962,
+        "f1-score": 0.6208167024869512,
+        "support": 1734.0
+      },
+      "Brady": {
+        "precision": 0.36903039073806077,
+        "recall": 0.3941267387944359,
+        "f1-score": 0.3811659192825112,
+        "support": 647.0
+      },
+      "VT": {
+        "precision": 0.673728813559322,
+        "recall": 0.6080305927342257,
+        "f1-score": 0.6391959798994975,
+        "support": 1046.0
+      },
+      "accuracy": 0.9092061634484104,
+      "macro avg": {
+        "precision": 0.6283079603775544,
+        "recall": 0.6238405423180676,
+        "f1-score": 0.62429605737501,
+        "support": 20508.0
+      },
+      "weighted avg": {
+        "precision": 0.9089594822917428,
+        "recall": 0.9092061634484104,
+        "f1-score": 0.9086216336024107,
+        "support": 20508.0
+      }
+    },
+    "outputs": {
+      "classification_report": "/content/drive/MyDrive/TFG_datasets/trial/results/foundation_moment_currentecg5_small/validation_classification_report.txt",
+      "confusion_matrix_csv": "/content/drive/MyDrive/TFG_datasets/trial/results/foundation_moment_currentecg5_small/validation_confusion_matrix.csv",
+      "confusion_matrix_png": "/content/drive/MyDrive/TFG_datasets/trial/results/foundation_moment_currentecg5_small/validation_confusion_matrix.png"
+    }
+  },
+  "test": {
+    "loss": 0.4470955419456315,
+    "accuracy": 0.9405049192500464,
+    "macro_f1": 0.7740680814720446,
+    "weighted_f1": 0.9379873258096848,
+    "arrhythmia_only_macro_f1": 0.7202800829899143,
+    "classification_report": {
+      "CurrentECG": {
+        "precision": 0.9828514573334894,
+        "recall": 0.9956717656824381,
+        "f1-score": 0.9892200754005656,
+        "support": 16866.0
+      },
+      "AF": {
+        "precision": 0.51661918328585,
+        "recall": 0.526621490803485,
+        "f1-score": 0.5215723873441994,
+        "support": 1033.0
+      },
+      "Asystole": {
+        "precision": 0.8955,
+        "recall": 0.8796660117878192,
+        "f1-score": 0.8875123885034688,
+        "support": 2036.0
+      },
+      "Brady": {
+        "precision": 0.7836691410392365,
+        "recall": 0.9426020408163265,
+        "f1-score": 0.855819339895773,
+        "support": 784.0
+      },
+      "VT": {
+        "precision": 0.8562231759656652,
+        "recall": 0.4813027744270205,
+        "f1-score": 0.6162162162162163,
+        "support": 829.0
+      },
+      "accuracy": 0.9405049192500464,
+      "macro avg": {
+        "precision": 0.8069725915248483,
+        "recall": 0.7651728167034179,
+        "f1-score": 0.7740680814720446,
+        "support": 21548.0
+      },
+      "weighted avg": {
+        "precision": 0.940128267828625,
+        "recall": 0.9405049192500464,
+        "f1-score": 0.9379873258096848,
+        "support": 21548.0
+      }
+    },
+    "outputs": {
+      "classification_report": "/content/drive/MyDrive/TFG_datasets/trial/results/foundation_moment_currentecg5_small/test_classification_report.txt",
+      "confusion_matrix_csv": "/content/drive/MyDrive/TFG_datasets/trial/results/foundation_moment_currentecg5_small/test_confusion_matrix.csv",
+      "confusion_matrix_png": "/content/drive/MyDrive/TFG_datasets/trial/results/foundation_moment_currentecg5_small/test_confusion_matrix.png"
+    }
+  },
+  "device": "cpu"
+}
